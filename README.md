@@ -146,3 +146,5 @@ See `/docs` folder for:
 ## 📄 License
 
 This project is created for portfolio demonstration purposes.
+
+_Repository note: minor README maintenance update._
