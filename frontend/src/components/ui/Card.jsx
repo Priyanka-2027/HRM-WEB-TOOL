@@ -9,11 +9,11 @@ const Card = ({
   return (
     <div 
       className={`
-        bg-gray-900/60
-        backdrop-blur-md
+        bg-black/40
+        backdrop-blur-xl
         border 
-        border-gray-700/30
-        rounded-lg 
+        border-white/5
+        rounded-xl 
         ${padding ? 'p-6' : ''} 
         ${hoverStyles}
         ${className}

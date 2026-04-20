@@ -7,5 +7,6 @@ export const env = {
   port: Number(process.env.PORT || 5000),
   mongodbUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/hironix',
   clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
-  jwtSecret: process.env.JWT_SECRET || 'change-me',
+  jwtSecret: process.env.JWT_SECRET || 'hironix-jwt-secret-key-change-in-production',
+  jwtExpire: process.env.JWT_EXPIRE || '7d',
 };

@@ -1,9 +1,22 @@
 const Badge = ({ 
   children, 
   variant = 'default',
+  color,
   size = 'md',
   className = '' 
 }) => {
+  const colorToVariant = {
+    gray: 'default',
+    cyan: 'primary',
+    green: 'success',
+    yellow: 'warning',
+    red: 'danger',
+    blue: 'info',
+    purple: 'primary',
+  };
+
+  const effectiveVariant = color ? (colorToVariant[color] || 'default') : variant;
+
   const variants = {
     default: 'bg-gray-700 text-gray-300',
     primary: 'bg-cyan-600/20 text-cyan-400 border border-cyan-500/30',
@@ -26,7 +39,7 @@ const Badge = ({
         items-center 
         rounded-full 
         font-medium
-        ${variants[variant]} 
+        ${variants[effectiveVariant]} 
         ${sizes[size]} 
         ${className}
       `}

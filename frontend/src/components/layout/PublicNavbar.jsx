@@ -3,36 +3,34 @@ import Button from '../ui/Button';
 
 const PublicNavbar = () => {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-900/70 backdrop-blur-md border-b border-gray-800/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-8">
-            <Link to="/" className="text-2xl font-bold text-white">
-              Hironix
-            </Link>
-            <div className="hidden md:flex space-x-6">
-              <Link to="/" className="text-gray-300 hover:text-white transition-colors">
-                Features
-              </Link>
-              <Link to="/" className="text-gray-300 hover:text-white transition-colors">
-                Product
-              </Link>
-              <Link to="/" className="text-gray-300 hover:text-white transition-colors">
-                About
-              </Link>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Link to="/login">
-              <Button variant="outline" size="sm">
-                Login
-              </Button>
-            </Link>
-            <Button size="sm">
-              Get Started
-            </Button>
-          </div>
-        </div>
+    <nav className="fixed inset-x-0 top-0 z-50 pointer-events-none">
+      <div className="pointer-events-auto fixed top-4 left-4 sm:top-6 sm:left-6 animate-float-in-left">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-3 rounded-full px-2 py-1 transition-colors hover:bg-white/10"
+        >
+          <img
+            src="/hironix.png"
+            alt="Hironix logo"
+            className="h-10 w-10 rounded-full object-cover border border-white/20"
+          />
+          <span className="text-xl sm:text-2xl font-bold text-white tracking-wide">
+            Hironix
+          </span>
+        </Link>
+      </div>
+
+      <div className="pointer-events-auto fixed top-4 right-4 sm:top-6 sm:right-6 flex flex-wrap items-center justify-end gap-2 sm:gap-3 animate-float-in-right max-w-[calc(100vw-2rem)] sm:max-w-none">
+        <Link to="/login">
+          <Button variant="outline" size="sm">
+            Login
+          </Button>
+        </Link>
+        <Link to="/login">
+          <Button size="sm">
+            Get Started
+          </Button>
+        </Link>
       </div>
     </nav>
   );

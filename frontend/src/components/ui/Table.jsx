@@ -6,6 +6,20 @@ const Table = ({
   onRowClick,
   className = '' 
 }) => {
+  const getHeader = (col) => col.header || col.label || '';
+  const getValue = (row, col) => {
+    if (col.render) {
+      if (col.accessor || col.key) {
+        const raw = row[col.accessor || col.key];
+        return col.render(raw, row);
+      }
+      return col.render(row);
+    }
+
+    const accessor = col.accessor || col.key;
+    return accessor ? row[accessor] : '';
+  };
+
   return (
     <Card padding={false} className={className}>
       <div className="overflow-x-auto">
@@ -17,7 +31,7 @@ const Table = ({
                   key={idx}
                   className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
                 >
-                  {col.header}
+                  {getHeader(col)}
                 </th>
               ))}
             </tr>
@@ -41,7 +55,7 @@ const Table = ({
                 >
                   {columns.map((col, colIdx) => (
                     <td key={colIdx} className="px-6 py-4 text-sm text-gray-300">
-                      {col.render ? col.render(row) : row[col.accessor]}
+                      {getValue(row, col)}
                     </td>
                   ))}
                 </tr>

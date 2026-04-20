@@ -2,14 +2,17 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import GlobalPrismBackgroundFixed from '../components/background/GlobalPrismBackgroundFixed';
 import { Button, Card, Input } from '../components/ui';
+import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login, loading } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
   const [errors, setErrors] = useState({});
+  const [serverError, setServerError] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -17,9 +20,12 @@ const LoginPage = () => {
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
+    if (serverError) {
+      setServerError('');
+    }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = {};
@@ -31,11 +37,13 @@ const LoginPage = () => {
       return;
     }
 
-    // Demo login logic - will be replaced with actual auth in Phase 3
-    if (formData.email.includes('admin')) {
-      navigate('/admin/dashboard');
+    const result = await login(formData.email, formData.password);
+
+    if (result.success) {
+      const role = result.user?.role;
+      navigate(role === 'admin' ? '/admin/dashboard' : '/employee/dashboard');
     } else {
-      navigate('/employee/dashboard');
+      setServerError(result.error || 'Login failed. Please try again.');
     }
   };
 
@@ -55,6 +63,12 @@ const LoginPage = () => {
         </div>
 
         <Card>
+          {serverError && (
+            <div className="mb-4 p-3 bg-red-900/20 border border-red-600/50 rounded text-red-400 text-sm">
+              {serverError}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
             <Input
               label="Email"
@@ -64,6 +78,7 @@ const LoginPage = () => {
               onChange={handleChange}
               placeholder="Enter your email"
               error={errors.email}
+              disabled={loading}
               required
             />
 
@@ -75,11 +90,16 @@ const LoginPage = () => {
               onChange={handleChange}
               placeholder="Enter your password"
               error={errors.password}
+              disabled={loading}
               required
             />
 
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={loading}
+            >
+              {loading ? 'Signing in...' : 'Sign In'}
             </Button>
           </form>
 

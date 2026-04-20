@@ -2,9 +2,9 @@ import Prism from './Prism';
 
 const GlobalPrismBackgroundFixed = ({ intensity = 'medium' }) => {
   const opacityMap = {
-    high: 1,
-    medium: 0.6,
-    low: 0.4
+    high: 0.6,
+    medium: 0.3,
+    low: 0.15
   };
 
   return (
@@ -26,8 +26,8 @@ const GlobalPrismBackgroundFixed = ({ intensity = 'medium' }) => {
         scale={3.6}
         height={3.5}
         baseWidth={5.5}
-        glow={0.8}
-        noise={0}
+        glow={0.4}
+        noise={0.1}
         colorFrequency={1}
         suspendWhenOffscreen={false}
       />

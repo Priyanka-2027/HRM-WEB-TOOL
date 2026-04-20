@@ -8,7 +8,8 @@ const Input = ({
   error = '',
   required = false,
   className = '',
-  disabled = false
+  disabled = false,
+  ...props
 }) => {
   return (
     <div className={`flex flex-col ${className}`}>
@@ -26,6 +27,7 @@ const Input = ({
         placeholder={placeholder}
         disabled={disabled}
         required={required}
+        {...props}
         className={`
           px-4 py-2.5 
           bg-gray-800/50 
