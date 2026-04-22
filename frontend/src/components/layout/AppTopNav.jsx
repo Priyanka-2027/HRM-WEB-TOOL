@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { LogOut, User, Search, Bell, Menu, X } from 'lucide-react';
@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const AppTopNav = ({ userRole = 'employee' }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [showMenu, setShowMenu] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const { user, logout } = useAuth();
@@ -34,9 +35,9 @@ const AppTopNav = ({ userRole = 'employee' }) => {
         <div className="flex items-center justify-between h-20">
           {/* Logo & Desktop Nav */}
           <div className="flex items-center gap-12">
-            <Link to="/" className="text-2xl font-black text-white tracking-tighter flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-sm">H</span>
-              <span className="hidden sm:block">HIRONIX</span>
+            <Link to="/" className="flex items-center gap-3">
+              <img src="/hironix.png" alt="Hironix Logo" className="w-10 h-10 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]" />
+              <span className="text-2xl font-black text-white tracking-tighter hidden sm:block">HIRONIX</span>
             </Link>
             
             <div className="hidden lg:flex items-center gap-1">
@@ -109,7 +110,10 @@ const AppTopNav = ({ userRole = 'employee' }) => {
                       </button>
                       <div className="h-px bg-white/5 my-1" />
                       <button
-                        onClick={logout}
+                        onClick={async () => {
+                          await logout();
+                          navigate('/');
+                        }}
                         className="w-full flex items-center gap-3 px-4 py-3 text-xs font-bold text-red-400 hover:bg-red-500/10 transition-all uppercase tracking-widest"
                       >
                         <LogOut className="w-4 h-4" /> Terminate Session

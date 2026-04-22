@@ -4,15 +4,18 @@ import AppLayout from '../components/layout/AppLayout';
 import BorderGlow from '../components/ui/BorderGlow';
 import AuthInformatics from '../components/auth/AuthInformatics';
 import { useAuth } from '../contexts/AuthContext';
-import { AlertCircle, Lock, Mail, ArrowLeft, ChevronRight } from 'lucide-react';
+import { AlertCircle, Lock, Mail, ArrowLeft, ChevronRight, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const navigate = useNavigate();
-  const { login, loading } = useAuth();
+  const { register, loading } = useAuth();
   const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
@@ -27,15 +30,28 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
+    if (!formData.firstName) newErrors.firstName = 'First Name is required';
+    if (!formData.lastName) newErrors.lastName = 'Last Name is required';
     if (!formData.email) newErrors.email = 'Email is required';
     if (!formData.password) newErrors.password = 'Password is required';
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+    
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    const result = await login(formData.email, formData.password);
-    if (!result.success) {
-      setServerError(result.error || 'Login failed. Please try again.');
+
+    const result = await register(
+      formData.email, 
+      formData.firstName, 
+      formData.lastName, 
+      formData.password
+    );
+
+    if (result.success) {
+      navigate('/employee/dashboard');
+    } else {
+      setServerError(result.error || 'Registration failed. Please try again.');
     }
   };
 
@@ -47,9 +63,9 @@ const LoginPage = () => {
           <AuthInformatics />
         </div>
 
-        {/* Right Side: Login Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12">
-          <div className="w-full max-w-md">
+        {/* Right Side: Register Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 md:p-12 overflow-y-auto">
+          <div className="w-full max-w-md py-12">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -61,12 +77,12 @@ const LoginPage = () => {
               </div>
 
               <div className="mb-10">
-                <Link to="/" className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors group mb-4">
+                <Link to="/login" className="inline-flex items-center gap-2 text-slate-500 hover:text-white transition-colors group mb-4">
                   <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                  <span className="text-xs font-bold uppercase tracking-widest text-[10px]">Back to Home</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-[10px]">Back to Login</span>
                 </Link>
-                <h2 className="text-4xl font-black text-white tracking-tight mb-2">Welcome Back</h2>
-                <p className="text-slate-400 text-sm font-medium">Please enter your credentials to access the portal.</p>
+                <h2 className="text-4xl font-black text-white tracking-tight mb-2">Join Hironix</h2>
+                <p className="text-slate-400 text-sm font-medium">Create your talent account to get started.</p>
               </div>
 
               <BorderGlow borderRadius={32}>
@@ -82,7 +98,39 @@ const LoginPage = () => {
                     </motion.div>
                   )}
 
-                  <form onSubmit={handleSubmit} className="space-y-6">
+                  <form onSubmit={handleSubmit} className="space-y-5">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-slate-500 ml-1">First Name</label>
+                        <div className="relative group">
+                          <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
+                          <input
+                            type="text"
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleChange}
+                            placeholder="John"
+                            className={`w-full bg-white/5 border ${errors.firstName ? 'border-red-500/50' : 'border-white/10'} rounded-2xl pl-12 pr-4 py-3.5 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-all`}
+                            disabled={loading}
+                            required
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-slate-500 ml-1">Last Name</label>
+                        <input
+                          type="text"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleChange}
+                          placeholder="Doe"
+                          className={`w-full bg-white/5 border ${errors.lastName ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-all`}
+                          disabled={loading}
+                          required
+                        />
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-slate-500 ml-1">Work Email</label>
                       <div className="relative group">
@@ -98,7 +146,6 @@ const LoginPage = () => {
                           required
                         />
                       </div>
-                      {errors.email && <p className="text-[10px] text-red-400 ml-1">{errors.email}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -116,7 +163,21 @@ const LoginPage = () => {
                           required
                         />
                       </div>
-                      {errors.password && <p className="text-[10px] text-red-400 ml-1">{errors.password}</p>}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-slate-500 ml-1">Confirm Password</label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        placeholder="••••••••"
+                        className={`w-full bg-white/5 border ${errors.confirmPassword ? 'border-red-500/50' : 'border-white/10'} rounded-2xl px-4 py-3.5 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-all`}
+                        disabled={loading}
+                        required
+                      />
+                      {errors.confirmPassword && <p className="text-[10px] text-red-400 ml-1">{errors.confirmPassword}</p>}
                     </div>
 
                     <button
@@ -124,9 +185,9 @@ const LoginPage = () => {
                       disabled={loading}
                       className="w-full py-4 rounded-2xl bg-white text-black font-black text-xs uppercase tracking-widest hover:bg-cyan-400 hover:text-black transition-all shadow-xl shadow-white/5 disabled:opacity-50 mt-4 active:scale-[0.98] flex items-center justify-center gap-2 group"
                     >
-                      {loading ? 'Authenticating...' : (
+                      {loading ? 'Creating Account...' : (
                         <>
-                          Sign In to Portal
+                          Complete Registration
                           <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                         </>
                       )}
@@ -134,12 +195,12 @@ const LoginPage = () => {
                   </form>
 
                   <div className="mt-10 pt-8 border-t border-white/5 text-center">
-                    <p className="text-xs text-slate-500 font-medium mb-4">New to Hironix?</p>
+                    <p className="text-xs text-slate-500 font-medium mb-4">Already have an account?</p>
                     <Link
-                      to="/register"
+                      to="/login"
                       className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
                     >
-                      Create Account
+                      Sign In Instead
                     </Link>
                   </div>
                 </div>
@@ -152,4 +213,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;

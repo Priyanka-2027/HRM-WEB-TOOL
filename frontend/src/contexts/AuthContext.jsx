@@ -44,9 +44,6 @@ export const AuthProvider = ({ children }) => {
       setToken(newToken);
       setUser(userData);
 
-      // Microsynchronous delay to ensure context propagates before navigation
-      await new Promise(resolve => setTimeout(resolve, 100));
-
       return { success: true, user: userData };
     } catch (err) {
       const errorMsg = err.response?.data?.message || 'Login failed. Please check your credentials and server connection.';

@@ -123,7 +123,7 @@ const AdminDashboardPage = () => {
               glowColor={glow}
               colors={[color, color, color]}
               backgroundColor="rgba(15, 17, 26, 0.5)"
-              borderRadius={24}
+              borderRadius={28}
               glowIntensity={0.8}
               animated
             >
@@ -147,7 +147,7 @@ const AdminDashboardPage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
         {/* Main Attendance Chart */}
         <div className="lg:col-span-8">
-          <BorderGlow glowColor="200 85 65" colors={['#22d3ee', '#06b6d4']}>
+          <BorderGlow glowColor="200 85 65" colors={['#22d3ee', '#06b6d4']} borderRadius={28}>
             <div className="p-6 h-[400px] flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -195,7 +195,7 @@ const AdminDashboardPage = () => {
 
         {/* Leave Pie Chart */}
         <div className="lg:col-span-4">
-          <BorderGlow glowColor="38 90 65" colors={['#fbbf24', '#f59e0b']}>
+          <BorderGlow glowColor="38 90 65" colors={['#fbbf24', '#f59e0b']} borderRadius={28}>
             <div className="p-6 h-[400px] flex flex-col">
               <div className="flex items-center gap-3 mb-6">
                 <PieIcon className="w-5 h-5 text-amber-400" />
@@ -239,7 +239,7 @@ const AdminDashboardPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Skills Card */}
-        <BorderGlow glowColor="160 75 60" colors={['#34d399', '#10b981']}>
+        <BorderGlow glowColor="160 75 60" colors={['#34d399', '#10b981']} borderRadius={28}>
           <div className="p-6">
             <div className="flex items-center gap-3 mb-6">
               <BookOpen className="w-5 h-5 text-emerald-400" />
@@ -275,7 +275,7 @@ const AdminDashboardPage = () => {
         </BorderGlow>
 
         {/* Announcements/Notice Board */}
-        <BorderGlow glowColor="260 70 75" colors={['#a78bfa', '#818cf8']}>
+        <BorderGlow glowColor="260 70 75" colors={['#a78bfa', '#818cf8']} borderRadius={28}>
           <div className="p-6">
             <div className="flex items-center gap-3 mb-6">
               <Megaphone className="w-5 h-5 text-violet-400" />

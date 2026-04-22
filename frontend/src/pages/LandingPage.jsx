@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import AppLayout from '../components/layout/AppLayout';
 import PublicNavbar from '../components/layout/PublicNavbar';
 import BorderGlow from '../components/ui/BorderGlow';
+import HeroSpotlight from '../components/ui/HeroSpotlight';
 import { motion } from 'framer-motion';
 import { Users, Clock, Activity, BookOpen, ChevronRight } from 'lucide-react';
 
@@ -50,6 +51,7 @@ const LandingPage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
+            <HeroSpotlight>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-400 text-xs font-bold uppercase tracking-widest mb-8 backdrop-blur-md">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
                 Experience the future of talent operations
@@ -66,33 +68,33 @@ const LandingPage = () => {
                 Hironix orchestrates your HR operations with glassmorphic intelligence and data-driven precision.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-                <Link to="/login">
-                  <button className="px-8 py-4 rounded-2xl bg-white text-black font-black text-sm uppercase tracking-widest hover:bg-cyan-400 hover:scale-105 transition-all shadow-2xl shadow-white/10 flex items-center gap-2 group">
-                    Enter Portal
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </Link>
-                <button className="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-sm uppercase tracking-widest hover:bg-white/10 transition-all backdrop-blur-xl">
-                  Documentation
-                </button>
-              </div>
-
-              {/* Data Highlights */}
-              <div className="mt-24 grid grid-cols-2 md:grid-cols-3 gap-12 max-w-4xl mx-auto border-t border-white/5 pt-16">
+              <div className="mt-24 grid grid-cols-2 md:grid-cols-3 gap-12 max-w-4xl mx-auto border-t border-white/5 pt-16 mb-12">
                 <div>
-                  <p className="text-4xl font-black text-white mb-2 leading-none tracking-tighter">500+</p>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Enterprise Clients</p>
+                  <p className="text-xl font-black text-white mb-2 leading-none tracking-tighter uppercase italic">MODERN UX</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Crystal-clear glassmorphism</p>
                 </div>
                 <div>
-                  <p className="text-4xl font-black text-white mb-2 leading-none tracking-tighter">10K+</p>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Managed Talents</p>
+                  <p className="text-xl font-black text-white mb-2 leading-none tracking-tighter uppercase italic">SMART HRM</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Intelligent role-based logic</p>
                 </div>
                 <div className="col-span-2 md:col-span-1">
-                  <p className="text-4xl font-black text-white mb-2 leading-none tracking-tighter">99.9%</p>
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Operational Uptime</p>
+                  <p className="text-xl font-black text-white mb-2 leading-none tracking-tighter uppercase italic">UNIFIED HUB</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Centralized talent operations</p>
                 </div>
               </div>
+            </HeroSpotlight>
+
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+              <Link to="/login">
+                <button className="px-8 py-4 rounded-2xl bg-white text-black font-black text-sm uppercase tracking-widest hover:bg-cyan-400 hover:scale-105 transition-all shadow-2xl shadow-white/10 flex items-center gap-2 group">
+                  Enter Portal
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </Link>
+              <a href="#features" className="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-sm uppercase tracking-widest hover:bg-white/10 transition-all backdrop-blur-xl flex items-center justify-center">
+                Documentation
+              </a>
+            </div>
             </motion.div>
           </div>
         </section>
@@ -124,7 +126,7 @@ const LandingPage = () => {
                   <BorderGlow
                     glowColor={feature.glow}
                     colors={[feature.color, feature.color]}
-                    borderRadius={24}
+                    borderRadius={28}
                     glowIntensity={0.6}
                     animated
                   >
@@ -145,7 +147,7 @@ const LandingPage = () => {
         {/* CTA Section */}
         <section className="py-32 px-4">
           <div className="max-w-5xl mx-auto">
-            <BorderGlow glowColor="260 70 75" colors={['#a78bfa', '#818cf8']} borderRadius={32} animated>
+            <BorderGlow glowColor="260 70 75" colors={['#a78bfa', '#818cf8']} borderRadius={28} animated>
               <div className="p-12 md:p-20 text-center relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/10 blur-[100px] -z-10" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-600/10 blur-[100px] -z-10" />
