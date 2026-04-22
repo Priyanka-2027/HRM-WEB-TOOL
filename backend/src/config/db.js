@@ -3,6 +3,11 @@ import { env } from './env.js';
 
 export async function connectDB() {
   try {
+    if (mongoose.connection.readyState >= 1) {
+      console.log('[DB] Using existing database connection');
+      return;
+    }
+
     const cleanUri = env.mongodbUri.trim().replace(/[\r\n\t]/g, '');
     
     // Better masking: show the protocol and the username, hide only the password
