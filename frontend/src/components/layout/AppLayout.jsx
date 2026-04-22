@@ -2,42 +2,54 @@ import Prism from '../background/Prism';
 
 const AppLayout = ({ children }) => {
   return (
-    <div style={{ width: '100%', minHeight: '100vh', position: 'relative' }}>
-      {/* Translucent Prism Background */}
+    <div style={{ width: '100%', minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
+      {/* Dynamic Background Layer */}
       <div style={{
-        position: 'absolute',
+        position: 'fixed',
         inset: 0,
-        opacity: 0.4,
-        zIndex: 0
+        zIndex: 0,
+        pointerEvents: 'none'
       }}>
         <Prism
           animationType="rotate"
-          timeScale={0.3}
-          scale={3.6}
-          height={3.5}
-          baseWidth={5.5}
-          glow={0.8}
-          noise={0}
-          colorFrequency={1}
+          timeScale={0.15}
+          scale={4.0}
+          height={3.0}
+          baseWidth={6.0}
+          glow={0.6}
+          noise={0.02}
+          colorFrequency={1.2}
           suspendWhenOffscreen={true}
+          opacity={0.3}
         />
       </div>
 
-      {/* Semi-transparent Dark Overlay for Glassomorphism */}
+      {/* Dark Silk Overlay */}
       <div style={{
-        position: 'absolute',
+        position: 'fixed',
         inset: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
-        backdropFilter: 'blur(2px)',
+        background: 'radial-gradient(circle at 50% -20%, rgba(13, 17, 30, 0.4) 0%, #06080f 85%)',
         zIndex: 1,
         pointerEvents: 'none'
       }} />
 
-      {/* Content */}
+      {/* Noise Texture for Premium Feel */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        backgroundImage: 'url("/noise.svg")',
+        opacity: 0.05,
+        mixBlendMode: 'overlay',
+        zIndex: 2,
+        pointerEvents: 'none'
+      }} />
+
+      {/* Scrollable Content Layer */}
       <div style={{
         position: 'relative',
         zIndex: 10,
-        width: '100%'
+        width: '100%',
+        minHeight: '100vh'
       }}>
         {children}
       </div>

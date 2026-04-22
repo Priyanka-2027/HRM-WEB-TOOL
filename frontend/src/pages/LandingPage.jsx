@@ -1,125 +1,187 @@
 import { Link } from 'react-router-dom';
-import GlobalPrismBackgroundFixed from '../components/background/GlobalPrismBackgroundFixed';
+import AppLayout from '../components/layout/AppLayout';
 import PublicNavbar from '../components/layout/PublicNavbar';
-import { Button, Card } from '../components/ui';
+import BorderGlow from '../components/ui/BorderGlow';
+import { motion } from 'framer-motion';
+import { Users, Clock, Activity, BookOpen, ChevronRight } from 'lucide-react';
 
 const LandingPage = () => {
   const features = [
     {
-      title: 'Employee Management',
-      description: 'Comprehensive employee records and profile management'
+      title: 'Workforce Records',
+      description: 'Comprehensive employee lifecycle management with interactive profiles.',
+      Icon: Users,
+      glow: '200 85 65',
+      color: '#22d3ee'
     },
     {
-      title: 'Attendance Tracking',
-      description: 'Real-time attendance monitoring and analytics'
+      title: 'Time Intelligence',
+      description: 'Precision attendance tracking with automated anomaly detection.',
+      Icon: Clock,
+      glow: '160 75 60',
+      color: '#34d399'
     },
     {
-      title: 'Leave Management',
-      description: 'Streamlined leave requests and approval workflows'
+      title: 'Dynamic Leaves',
+      description: 'Streamlined approval engines with real-time balance calculations.',
+      Icon: Activity,
+      glow: '38 90 65',
+      color: '#fbbf24'
     },
     {
-      title: 'Skill Matrix',
-      description: 'Track employee skills and proficiency levels'
+      title: 'Skill Architecture',
+      description: 'Map and visualize talent proficiency across your entire organization.',
+      Icon: BookOpen,
+      glow: '260 70 75',
+      color: '#a78bfa'
     }
   ];
 
   return (
-    <div className="relative min-h-screen bg-black text-white">
-      {/* Fixed Prism Background */}
-      <GlobalPrismBackgroundFixed intensity="high" />
+    <AppLayout>
+      <PublicNavbar />
 
-      {/* Scrollable Content */}
-      <div className="relative z-10">
-        {/* Navbar */}
-        <PublicNavbar />
-
+      <main className="relative">
         {/* Hero Section */}
-        <section className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 bg-gradient-to-r from-white via-cyan-200 to-cyan-400 bg-clip-text text-transparent">
-              Modern HR Management
-            </h1>
-            <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto">
-              Employee records, attendance, leaves, and skill insights for growing teams
-            </p>
+        <section className="relative min-h-[90vh] flex items-center justify-center pt-24 pb-12 px-4 overflow-hidden">
+          <div className="max-w-7xl mx-auto text-center relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-400 text-xs font-bold uppercase tracking-widest mb-8 backdrop-blur-md">
+                <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                Experience the future of talent operations
+              </div>
+              
+              <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter mb-8 leading-[0.9]">
+                MASTER YOUR <br />
+                <span className="bg-gradient-to-r from-cyan-400 via-blue-500 to-violet-500 bg-clip-text text-transparent">
+                  WORKFORCE
+                </span>
+              </h1>
+              
+              <p className="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto font-medium leading-relaxed">
+                Hironix orchestrates your HR operations with glassmorphic intelligence and data-driven precision.
+              </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link to="/login">
-                <Button size="lg">
-                  Start Demo
-                </Button>
-              </Link>
-              <Button variant="outline" size="lg">
-                View Features
-              </Button>
-            </div>
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                <Link to="/login">
+                  <button className="px-8 py-4 rounded-2xl bg-white text-black font-black text-sm uppercase tracking-widest hover:bg-cyan-400 hover:scale-105 transition-all shadow-2xl shadow-white/10 flex items-center gap-2 group">
+                    Enter Portal
+                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </Link>
+                <button className="px-8 py-4 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-sm uppercase tracking-widest hover:bg-white/10 transition-all backdrop-blur-xl">
+                  Documentation
+                </button>
+              </div>
 
-            {/* Trust Stats */}
-            <div className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-              <div>
-                <div className="text-3xl font-bold text-cyan-400">500+</div>
-                <div className="text-sm text-gray-400 mt-1">Companies</div>
+              {/* Data Highlights */}
+              <div className="mt-24 grid grid-cols-2 md:grid-cols-3 gap-12 max-w-4xl mx-auto border-t border-white/5 pt-16">
+                <div>
+                  <p className="text-4xl font-black text-white mb-2 leading-none tracking-tighter">500+</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Enterprise Clients</p>
+                </div>
+                <div>
+                  <p className="text-4xl font-black text-white mb-2 leading-none tracking-tighter">10K+</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Managed Talents</p>
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <p className="text-4xl font-black text-white mb-2 leading-none tracking-tighter">99.9%</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Operational Uptime</p>
+                </div>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-cyan-400">10K+</div>
-                <div className="text-sm text-gray-400 mt-1">Employees</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-cyan-400">99.9%</div>
-                <div className="text-sm text-gray-400 mt-1">Uptime</div>
-              </div>
-            </div>
+            </motion.div>
           </div>
         </section>
 
         {/* Features Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <section id="features" className="py-32 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-              Everything you need to manage your team
-            </h2>
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+              <div className="max-w-2xl">
+                <p className="text-cyan-400 font-bold uppercase tracking-[0.3em] text-[10px] mb-4">Core Ecosystem</p>
+                <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight">
+                  Everything you need to <br /> Scale with confidence
+                </h2>
+              </div>
+              <div className="text-slate-500 text-sm font-medium max-w-xs">
+                Modular HR intelligence designed for hyper-growth environments.
+              </div>
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {features.map((feature, idx) => (
-                <Card key={idx} hover className="text-center">
-                  <div className="w-12 h-12 bg-cyan-600/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                    <div className="w-6 h-6 bg-cyan-500 rounded"></div>
-                  </div>
-                  <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                  <p className="text-gray-400 text-sm">{feature.description}</p>
-                </Card>
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  viewport={{ once: true }}
+                >
+                  <BorderGlow
+                    glowColor={feature.glow}
+                    colors={[feature.color, feature.color]}
+                    borderRadius={24}
+                    glowIntensity={0.6}
+                    animated
+                  >
+                    <div className="p-8 h-full">
+                      <div className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6">
+                        <feature.Icon className="w-6 h-6" style={{ color: feature.color }} />
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-4">{feature.title}</h3>
+                      <p className="text-slate-400 text-sm leading-relaxed">{feature.description}</p>
+                    </div>
+                  </BorderGlow>
+                </motion.div>
               ))}
             </div>
           </div>
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto">
-            <Card className="text-center p-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Ready to transform your HR management?
-              </h2>
-              <p className="text-gray-400 mb-8">
-                Join hundreds of companies already using Hironix
-              </p>
-              <Link to="/login">
-                <Button size="lg">
-                  Get Started Free
-                </Button>
-              </Link>
-            </Card>
+        <section className="py-32 px-4">
+          <div className="max-w-5xl mx-auto">
+            <BorderGlow glowColor="260 70 75" colors={['#a78bfa', '#818cf8']} borderRadius={32} animated>
+              <div className="p-12 md:p-20 text-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/10 blur-[100px] -z-10" />
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-600/10 blur-[100px] -z-10" />
+                
+                <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter">
+                  Ready to evolve your <br /> HR Experience?
+                </h2>
+                <p className="text-lg text-slate-400 mb-12 max-w-2xl mx-auto font-medium">
+                  Join the elite teams already orchestrating their growth with Hironix.
+                </p>
+                <Link to="/login">
+                  <button className="px-10 py-5 rounded-2xl bg-white text-black font-black text-sm uppercase tracking-widest hover:bg-cyan-400 hover:scale-105 transition-all shadow-2xl shadow-white/10">
+                    Get Started Free
+                  </button>
+                </Link>
+              </div>
+            </BorderGlow>
           </div>
         </section>
 
         {/* Footer */}
-        <footer className="py-8 px-4 sm:px-6 lg:px-8 border-t border-gray-800">
-          <div className="max-w-7xl mx-auto text-center text-gray-500 text-sm">
-            <p>&copy; 2024 Hironix. All rights reserved.</p>
+        <footer className="py-12 px-4 border-t border-white/5 bg-black/20 backdrop-blur-md">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div className="flex items-center gap-4">
+              <span className="text-2xl font-black text-white tracking-tighter">HIRONIX</span>
+              <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest pt-1">© 2026 NEXUS SYSTEMS</span>
+            </div>
+            <div className="flex gap-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              <a href="#" className="hover:text-white transition-colors">Privacy</a>
+              <a href="#" className="hover:text-white transition-colors">Terms</a>
+              <a href="#" className="hover:text-white transition-colors">Contact</a>
+            </div>
           </div>
         </footer>
-      </div>
-    </div>
+      </main>
+    </AppLayout>
   );
 };
 

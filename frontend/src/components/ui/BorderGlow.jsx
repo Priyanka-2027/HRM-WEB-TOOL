@@ -66,7 +66,6 @@ const BorderGlow = ({
   coneSpread = 25,
   animated = false,
   colors = ['#c084fc', '#f472b6', '#38bdf8'],
-  fillOpacity = 0.5,
   style = {},
 }) => {
   const cardRef = useRef(null);
@@ -142,7 +141,6 @@ const BorderGlow = ({
         '--border-radius': `${borderRadius}px`,
         '--glow-padding': `${glowRadius}px`,
         '--cone-spread': coneSpread,
-        '--fill-opacity': fillOpacity,
         '--card-bg': backgroundColor,
         '--edge-sensitivity': edgeSensitivity,
         ...glowVars,
@@ -158,5 +156,6 @@ const BorderGlow = ({
     </div>
   );
 };
+
 
 export default BorderGlow;

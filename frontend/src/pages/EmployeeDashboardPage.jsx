@@ -1,68 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import AppShell from '../components/layout/AppShell';
 import PageHeader from '../components/layout/PageHeader';
-import Card from '../components/ui/Card';
 import BorderGlow from '../components/ui/BorderGlow';
 import { dashboardService } from '../api/dashboardService';
 import { announcementService } from '../api/announcementService';
 import { payrollService } from '../api/payrollService';
-import { CalendarCheck, BookOpen, Clock, Activity, Coins, AlertCircle, Megaphone } from 'lucide-react';
-import { motion } from 'framer-motion';
-
-const MAX_BAR = 100;
-
-const ATTENDANCE_COLORS = {
-  present: { bar: 'from-cyan-500 to-cyan-400',    text: 'text-cyan-400'    },
-  absent:  { bar: 'from-red-500 to-red-400',      text: 'text-red-400'     },
-  late:    { bar: 'from-amber-500 to-amber-400',  text: 'text-amber-400'   },
-  halfDay: { bar: 'from-orange-500 to-orange-400',text: 'text-orange-400'  },
-  onLeave: { bar: 'from-purple-500 to-purple-400',text: 'text-purple-400'  },
-};
-
-const SKILL_COLORS = ['from-cyan-500 to-cyan-400', 'from-violet-500 to-violet-400', 'from-emerald-500 to-emerald-400', 'from-amber-500 to-amber-400', 'from-pink-500 to-pink-400'];
-
-const kpiCards = [
-  {
-    key: 'attendanceThisMonth',
-    label: 'My Attendance',
-    Icon: CalendarCheck,
-    glowColor: '200 85 65',
-    colors: ['#22d3ee', '#06b6d4', '#67e8f9'],
-    valueClass: 'text-cyan-300',
-    iconClass: 'text-cyan-400',
-    iconBg: 'bg-cyan-500/15 border-cyan-500/20',
-  },
-  {
-    key: 'approvedLeaves',
-    label: 'Approved Leaves',
-    Icon: Clock,
-    glowColor: '160 75 60',
-    colors: ['#34d399', '#10b981', '#6ee7b7'],
-    valueClass: 'text-emerald-300',
-    iconClass: 'text-emerald-400',
-    iconBg: 'bg-emerald-500/15 border-emerald-500/20',
-  },
-  {
-    key: 'pendingLeaves',
-    label: 'Pending Leaves',
-    Icon: Activity,
-    glowColor: '38 90 65',
-    colors: ['#fbbf24', '#f59e0b', '#fcd34d'],
-    valueClass: 'text-amber-300',
-    iconClass: 'text-amber-400',
-    iconBg: 'bg-amber-500/15 border-amber-500/20',
-  },
-  {
-    key: 'skillsCount',
-    label: 'My Skills',
-    Icon: BookOpen,
-    glowColor: '260 70 75',
-    colors: ['#a78bfa', '#818cf8', '#c4b5fd'],
-    valueClass: 'text-violet-300',
-    iconClass: 'text-violet-400',
-    iconBg: 'bg-violet-500/15 border-violet-500/20',
-  },
-];
+import { 
+  CalendarCheck, BookOpen, Clock, Activity, Coins, AlertCircle, 
+  Megaphone, PieChart as PieIcon, BarChart3, TrendingUp 
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis
+} from 'recharts';
 
 const EmployeeDashboardPage = () => {
   const [summary, setSummary] = useState(null);
@@ -88,6 +39,25 @@ const EmployeeDashboardPage = () => {
     })();
   }, []);
 
+  const attendanceData = useMemo(() => {
+    const raw = summary?.attendanceSummary || { present: 0, absent: 0, late: 0, halfDay: 0, onLeave: 0 };
+    return [
+      { name: 'Present', value: raw.present, color: '#22d3ee' },
+      { name: 'Absent', value: raw.absent, color: '#ef4444' },
+      { name: 'Late', value: raw.late, color: '#f59e0b' },
+      { name: 'Half Day', value: raw.halfDay, color: '#fb923c' },
+      { name: 'On Leave', value: raw.onLeave, color: '#a78bfa' },
+    ].filter(d => d.value > 0);
+  }, [summary]);
+
+  const skillData = useMemo(() => {
+    return (summary?.topSkills || []).map(s => ({
+      subject: s.name,
+      A: s.level,
+      fullMark: 5
+    }));
+  }, [summary]);
+
   const cards = summary?.cards || {
     attendanceThisMonth: 0,
     approvedLeaves: 0,
@@ -95,217 +65,223 @@ const EmployeeDashboardPage = () => {
     skillsCount: 0,
   };
 
-  const attendance = summary?.attendanceSummary || {
-    totalDays: 0,
-    present: 0,
-    absent: 0,
-    late: 0,
-    halfDay: 0,
-    onLeave: 0,
-  };
-
-  const topSkills = summary?.topSkills || [];
-  const totalAttendance = attendance.totalDays || 1;
+  const kpiCards = [
+    { key: 'attendanceThisMonth', label: 'My Presence', Icon: CalendarCheck, color: '#22d3ee', glow: '200 85 65' },
+    { key: 'approvedLeaves', label: 'Approved Off', Icon: Clock, color: '#34d399', glow: '160 75 60' },
+    { key: 'pendingLeaves', label: 'Pending Apps', Icon: Activity, color: '#fbbf24', glow: '38 90 65' },
+    { key: 'skillsCount', label: 'Endorsements', Icon: BookOpen, color: '#a78bfa', glow: '260 70 75' },
+  ];
 
   return (
     <AppShell userRole="employee">
       <PageHeader
         title="My Dashboard"
-        subtitle="Track your attendance, leaves, and skills"
+        subtitle="Real-time tracking of your performance and status"
       />
 
       {error && (
         <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 backdrop-blur-sm px-4 py-3 text-sm text-red-400"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mb-8 flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 backdrop-blur-md px-5 py-4 text-sm text-red-400"
         >
-          <AlertCircle className="w-4 h-4 shrink-0" />
+          <AlertCircle className="w-5 h-5 shrink-0" />
           {error}
         </motion.div>
       )}
 
-      {/* KPI Cards */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8"
-      >
-        {kpiCards.map(({ key, label, Icon, glowColor, colors, valueClass, iconClass, iconBg }, idx) => (
+      {/* KPI Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {kpiCards.map(({ key, label, Icon, color, glow }, idx) => (
           <motion.div
             key={key}
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.12 + idx * 0.07 }}
+            transition={{ duration: 0.5, delay: idx * 0.1 }}
           >
             <BorderGlow
-              glowColor={glowColor}
-              colors={colors}
-              backgroundColor="rgba(6, 8, 20, 0.55)"
-              borderRadius={16}
-              glowRadius={36}
-              glowIntensity={1.0}
+              glowColor={glow}
+              colors={[color, color]}
+              backgroundColor="rgba(15, 17, 26, 0.5)"
+              borderRadius={24}
+              glowIntensity={0.8}
               animated
             >
-              <div className="p-5">
+              <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-medium text-white/60">{label}</span>
-                  <div className={`w-9 h-9 rounded-lg border flex items-center justify-center ${iconBg}`}>
-                    <Icon className={`w-5 h-5 ${iconClass}`} />
+                  <p className="text-sm font-medium text-slate-400 capitalize">{label}</p>
+                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                    <Icon className="w-5 h-5" style={{ color }} />
                   </div>
                 </div>
-                <div className={`text-4xl font-bold tracking-tight ${valueClass}`}>
-                  {cards[key]}
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold tracking-tight text-white">{cards[key]}</span>
                 </div>
               </div>
             </BorderGlow>
           </motion.div>
         ))}
-      </motion.div>
+      </div>
 
-      {/* Charts Row */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.25 }}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-5"
-      >
-        {/* Monthly Attendance */}
-        <Card glowColor="200 85 65" colors={['#22d3ee', '#06b6d4', '#67e8f9']}>
-          <div className="flex items-center gap-2 mb-5">
-            <CalendarCheck className="w-5 h-5 text-cyan-400" />
-            <h3 className="text-base font-semibold text-white">Monthly Attendance</h3>
-          </div>
-          <div className="space-y-4">
-            {[
-              ['present', attendance.present],
-              ['absent', attendance.absent],
-              ['late', attendance.late],
-              ['halfDay', attendance.halfDay],
-              ['onLeave', attendance.onLeave],
-            ].map(([label, value]) => {
-              const width = ((value || 0) / totalAttendance) * MAX_BAR;
-              const style = ATTENDANCE_COLORS[label] || { bar: 'from-cyan-500 to-cyan-400', text: 'text-cyan-400' };
-              return (
-                <div key={label}>
-                  <div className="mb-1.5 flex justify-between text-sm">
-                    <span className="capitalize text-white/70">{label.replace(/([A-Z])/g, ' $1').trim()}</span>
-                    <span className={`font-semibold ${style.text}`}>{value}</span>
-                  </div>
-                  <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${width}%` }}
-                      transition={{ duration: 0.7, delay: 0.4, ease: 'easeOut' }}
-                      className={`h-full rounded-full bg-gradient-to-r ${style.bar}`}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+        {/* Attendance Pie Chart */}
+        <div className="lg:col-span-12 xl:col-span-5">
+          <BorderGlow glowColor="200 85 65" colors={['#22d3ee', '#06b6d4']}>
+            <div className="p-6 h-[400px] flex flex-col">
+              <div className="flex items-center gap-3 mb-6">
+                <PieIcon className="w-5 h-5 text-cyan-400" />
+                <h3 className="text-lg font-semibold text-white">Monthly Attendance</h3>
+              </div>
+              <div className="flex-1 min-h-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={attendanceData}
+                      cx="50%"
+                      cy="45%"
+                      innerRadius={65}
+                      outerRadius={90}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {attendanceData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'rgba(15, 17, 26, 0.9)', 
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '12px'
+                      }}
                     />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </Card>
-
-        {/* Skill Levels */}
-        <Card glowColor="260 70 75" colors={['#a78bfa', '#818cf8', '#c4b5fd']}>
-          <div className="flex items-center gap-2 mb-5">
-            <BookOpen className="w-5 h-5 text-violet-400" />
-            <h3 className="text-base font-semibold text-white">My Skill Levels</h3>
-          </div>
-          {topSkills.length === 0 ? (
-            <div className="h-48 flex items-center justify-center text-white/30 text-sm">No skill data yet</div>
-          ) : (
-            <div className="space-y-4">
-              {topSkills.map((skill, idx) => {
-                const width = (skill.level / 5) * MAX_BAR;
-                const colorClass = SKILL_COLORS[idx % SKILL_COLORS.length];
-                return (
-                  <div key={skill.name}>
-                    <div className="mb-1.5 flex justify-between text-sm">
-                      <span className="text-white/70">{skill.name}</span>
-                      <span className="text-violet-300 font-semibold">Level {skill.level}/5</span>
-                    </div>
-                    <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${width}%` }}
-                        transition={{ duration: 0.7, delay: 0.4 + idx * 0.05, ease: 'easeOut' }}
-                        className={`h-full rounded-full bg-gradient-to-r ${colorClass}`}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </Card>
-      </motion.div>
-
-      {/* Notice Board + Payroll */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.35 }}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5"
-      >
-        {/* Announcements */}
-        <Card glowColor="38 90 65" colors={['#fbbf24', '#f59e0b', '#fcd34d']}>
-          <div className="flex items-center gap-2 mb-5">
-            <Megaphone className="w-5 h-5 text-amber-400" />
-            <h3 className="text-base font-semibold text-white">Notice Board</h3>
-          </div>
-          {announcements.length === 0 ? (
-            <div className="text-white/30 text-sm">No announcements.</div>
-          ) : (
-            <div className="space-y-3">
-              {announcements.map((ann, idx) => (
-                <motion.div
-                  key={idx}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3, delay: 0.4 + idx * 0.06 }}
-                  className="p-4 border border-white/8 rounded-xl bg-white/4"
-                >
-                  <div className="flex justify-between items-start mb-1.5">
-                    <h4 className="font-semibold text-white text-sm">{ann.title}</h4>
-                    <span className="text-xs text-white/30 ml-4 shrink-0">{new Date(ann.createdAt).toLocaleDateString()}</span>
-                  </div>
-                  <p className="text-sm text-white/55">{ann.message}</p>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </Card>
-
-        {/* Payroll */}
-        <Card glowColor="160 75 60" colors={['#34d399', '#10b981', '#6ee7b7']}>
-          <div className="flex items-center gap-2 mb-5">
-            <Coins className="w-5 h-5 text-emerald-400" />
-            <h3 className="text-base font-semibold text-white">Current Payroll Estimate</h3>
-          </div>
-          {!payslip ? (
-            <div className="text-white/30 text-sm">Payroll data not available.</div>
-          ) : (
-            <div className="space-y-0">
-              {[
-                { label: 'Base Salary', value: `$${payslip.baseSalary}` },
-                { label: 'Working Days', value: `${payslip.effectivePresentDays} / ${payslip.totalDaysInMonth}` },
-                { label: 'Paid Leaves', value: `${payslip.paidLeaveDaysInMonth}` },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between items-center py-3 border-b border-white/8">
-                  <span className="text-sm text-white/55">{label}</span>
-                  <span className="font-semibold text-white text-sm">{value}</span>
-                </div>
-              ))}
-              <div className="flex justify-between items-center pt-4">
-                <span className="text-white/70 font-medium">Est. Salary</span>
-                <span className="text-2xl font-bold text-emerald-300">${payslip.finalSalary}</span>
+                    <Legend 
+                      verticalAlign="bottom" 
+                      height={36} 
+                      formatter={(value) => <span className="text-[11px] text-slate-400">{value}</span>}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
               </div>
             </div>
-          )}
-        </Card>
-      </motion.div>
+          </BorderGlow>
+        </div>
+
+        {/* Skill Radar Chart */}
+        <div className="lg:col-span-12 xl:col-span-7">
+          <BorderGlow glowColor="260 70 75" colors={['#a78bfa', '#818cf8']}>
+            <div className="p-6 h-[400px] flex flex-col">
+              <div className="flex items-center gap-3 mb-6">
+                <TrendingUp className="w-5 h-5 text-violet-400" />
+                <h3 className="text-lg font-semibold text-white">My Skill Insights</h3>
+              </div>
+              <div className="flex-1 min-h-0">
+                {skillData.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-slate-500 italic">No skills endorsed yet.</div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={skillData}>
+                      <PolarGrid stroke="rgba(255,255,255,0.05)" />
+                      <PolarAngleAxis dataKey="subject" tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 11 }} />
+                      <PolarRadiusAxis angle={30} domain={[0, 5]} tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: 10 }} />
+                      <Radar
+                        name="Skill Level"
+                        dataKey="A"
+                        stroke="#a78bfa"
+                        fill="#a78bfa"
+                        fillOpacity={0.5}
+                      />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(15, 17, 26, 0.9)', 
+                          border: '1px solid rgba(255,255,255,0.1)',
+                          borderRadius: '12px'
+                        }}
+                      />
+                    </RadarChart>
+                  </ResponsiveContainer>
+                )}
+              </div>
+            </div>
+          </BorderGlow>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Notices */}
+        <BorderGlow glowColor="38 90 65" colors={['#fbbf24', '#f59e0b']}>
+          <div className="p-6 h-full">
+            <div className="flex items-center gap-3 mb-6">
+              <Megaphone className="w-5 h-5 text-amber-400" />
+              <h3 className="text-lg font-semibold text-white">Notice Board</h3>
+            </div>
+            <div className="space-y-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+              <AnimatePresence mode="popLayout">
+                {announcements.length === 0 ? (
+                  <div className="text-slate-500 italic text-sm">No new notices for you.</div>
+                ) : (
+                  announcements.map((ann) => (
+                    <motion.div
+                      key={ann._id}
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="group p-4 rounded-xl bg-white/5 border border-white/5 hover:border-amber-500/20 transition-all"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <h4 className="text-sm font-semibold text-slate-200 group-hover:text-amber-300 transition-colors">{ann.title}</h4>
+                        <span className="text-[10px] text-slate-500">{new Date(ann.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <p className="text-xs text-slate-400 leading-relaxed">{ann.message}</p>
+                    </motion.div>
+                  ))
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </BorderGlow>
+
+        {/* Payroll Glance */}
+        <BorderGlow glowColor="160 75 60" colors={['#34d399', '#10b981']}>
+          <div className="p-6 h-full flex flex-col">
+            <div className="flex items-center gap-3 mb-8">
+              <Coins className="w-5 h-5 text-emerald-400" />
+              <h3 className="text-lg font-semibold text-white">Payroll Estimation</h3>
+            </div>
+            {!payslip ? (
+              <div className="flex-1 flex items-center justify-center text-slate-500 italic">Financial data syncing...</div>
+            ) : (
+              <div className="flex-1 space-y-2">
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Base Salary</p>
+                    <p className="text-xl font-bold text-white">${payslip.baseSalary}</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-1">Paid Days</p>
+                    <p className="text-xl font-bold text-white">{payslip.effectivePresentDays + payslip.paidLeaveDaysInMonth}</p>
+                  </div>
+                </div>
+
+                <div className="mt-auto pt-6 border-t border-white/10 flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-slate-400">Total Estimated Take-home</p>
+                    <p className="text-[10px] text-slate-500 mt-1">*Excluding dynamic incentives and tax</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-black text-emerald-400 tracking-tight">${payslip.finalSalary}</p>
+                  </div>
+                </div>
+                
+                <div className="mt-8">
+                  <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-sm font-semibold text-white hover:bg-white/10 transition-all uppercase tracking-widest text-[11px]">
+                    Detailed Breakdown
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </BorderGlow>
+      </div>
     </AppShell>
   );
 };

@@ -10,26 +10,24 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      verifyToken();
-    } else {
+    const initializeAuth = async () => {
+      const storedToken = localStorage.getItem('authToken');
+      if (storedToken) {
+        setToken(storedToken);
+        axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+        try {
+          const response = await axios.get('/auth/me');
+          setUser(response.data.data);
+        } catch (err) {
+          localStorage.removeItem('authToken');
+          setToken(null);
+          setUser(null);
+        }
+      }
       setLoading(false);
-    }
+    };
+    initializeAuth();
   }, []);
-
-  const verifyToken = async () => {
-    try {
-      const response = await axios.get('/auth/me');
-      setUser(response.data.data);
-    } catch (err) {
-      localStorage.removeItem('authToken');
-      setToken(null);
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const login = async (email, password) => {
     setLoading(true);
@@ -38,14 +36,20 @@ export const AuthProvider = ({ children }) => {
       const response = await axios.post('/auth/login', { email, password });
       const { token: newToken, user: userData } = response.data.data;
 
-      setToken(newToken);
-      setUser(userData);
+      // Update storage first
       localStorage.setItem('authToken', newToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+      
+      // Update state together
+      setToken(newToken);
+      setUser(userData);
+
+      // Microsynchronous delay to ensure context propagates before navigation
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       return { success: true, user: userData };
     } catch (err) {
-      const errorMsg = err.response?.data?.message || 'Login failed';
+      const errorMsg = err.response?.data?.message || 'Login failed. Please check your credentials and server connection.';
       setError(errorMsg);
       return { success: false, error: errorMsg };
     } finally {
@@ -66,10 +70,11 @@ export const AuthProvider = ({ children }) => {
       });
       const { token: newToken, user: userData } = response.data.data;
 
-      setToken(newToken);
-      setUser(userData);
       localStorage.setItem('authToken', newToken);
       axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+      
+      setToken(newToken);
+      setUser(userData);
 
       return { success: true, user: userData };
     } catch (err) {
