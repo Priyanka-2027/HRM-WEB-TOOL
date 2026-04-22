@@ -26,6 +26,7 @@ const CATEGORY_COLORS = {
   Default:   '#fb923c',
 };
 
+const AdminSkillsPage = () => {
   const [searchParams] = useSearchParams();
   const initialEmpId = searchParams.get('employeeId') || '';
   const [skills, setSkills] = useState([]);
