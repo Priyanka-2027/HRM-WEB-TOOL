@@ -5,12 +5,17 @@ import { LogOut, User, Search, Bell, Menu, X, ChevronRight, CheckCheck, Clock, A
 import { motion, AnimatePresence } from 'framer-motion';
 import { employeeService } from '../../api/employeeService';
 
-// ─── Static mock notifications (replace with real API later) ─────────────────
-const MOCK_NOTIFICATIONS = [
+// ─── Static mock notifications ─────────────────
+const ADMIN_NOTIFICATIONS = [
   { id: 1, type: 'info',    title: 'Leave Request Pending',    body: '3 new leave requests awaiting review', time: '5m ago',  read: false },
-  { id: 2, type: 'success', title: 'Payroll Processed',        body: 'May 2025 payroll has been finalized',   time: '2h ago',  read: false },
-  { id: 3, type: 'warning', title: 'Contract Expiring Soon',   body: 'Raj Kumar\'s contract ends in 7 days',  time: '1d ago',  read: true  },
-  { id: 4, type: 'info',    title: 'New Employee Joined',       body: 'David Park added to Engineering',       time: '2d ago',  read: true  },
+  { id: 2, type: 'warning', title: 'Contract Expiring Soon',   body: 'Raj Kumar\'s contract ends in 7 days',  time: '1d ago',  read: true  },
+  { id: 3, type: 'info',    title: 'New Employee Joined',       body: 'David Park added to Engineering',       time: '2d ago',  read: true  },
+];
+
+const EMPLOYEE_NOTIFICATIONS = [
+  { id: 1, type: 'success', title: 'Payroll Finalized',        body: 'Your May 2024 salary slip is ready',     time: '2h ago',  read: false },
+  { id: 2, type: 'info',    title: 'New Announcement',          body: 'Company Townhall link has been posted',  time: '10m ago', read: false },
+  { id: 3, type: 'success', title: 'Leave Approved',            body: 'Your Sick Leave (June 12) was cleared', time: '1d ago',  read: true  },
 ];
 
 const NOTIF_ICON = {
@@ -29,7 +34,16 @@ const AppTopNav = ({ userRole = 'employee' }) => {
   const [showMenu,       setShowMenu]       = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [notifications,  setNotifications]  = useState(MOCK_NOTIFICATIONS);
+  
+  // Use useMemo or simple conditional for initial role-based notifs
+  const [notifications, setNotifications] = useState(
+    userRole === 'admin' ? ADMIN_NOTIFICATIONS : EMPLOYEE_NOTIFICATIONS
+  );
+
+  useEffect(() => {
+    // Basic sync if role changes during session
+    setNotifications(userRole === 'admin' ? ADMIN_NOTIFICATIONS : EMPLOYEE_NOTIFICATIONS);
+  }, [userRole]);
 
   // Search state
   const [searchQuery,    setSearchQuery]    = useState('');

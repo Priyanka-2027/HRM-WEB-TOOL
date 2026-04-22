@@ -38,6 +38,10 @@ const CustomRadarDot = (props) => {
 };
 
 const EmployeeDashboardPage = () => {
+  const [summary, setSummary] = useState(null);
+  const [announcements, setAnnouncements] = useState([]);
+  const [payslip, setPayslip] = useState(null);
+  const [error, setError] = useState('');
   const [showBreakdown, setShowBreakdown] = useState(false);
 
   useEffect(() => {
