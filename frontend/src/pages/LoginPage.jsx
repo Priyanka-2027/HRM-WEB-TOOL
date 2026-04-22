@@ -27,8 +27,16 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
-    if (!formData.email) newErrors.email = 'Email is required';
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+
     if (!formData.password) newErrors.password = 'Password is required';
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;

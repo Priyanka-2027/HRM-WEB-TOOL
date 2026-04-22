@@ -1,10 +1,48 @@
 import { useEffect, useState } from 'react';
 import AppShell from '../components/layout/AppShell';
 import PageHeader from '../components/layout/PageHeader';
-import { Badge, Button, Card, Input, Table } from '../components/ui';
+import BorderGlow from '../components/ui/BorderGlow';
+import Input from '../components/ui/Input';
+import GlassSelect from '../components/ui/GlassSelect';
 import { leaveService } from '../api/leaveService';
 import { employeeService } from '../api/employeeService';
 import { useAuth } from '../contexts/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { CalendarOff, Clock, CheckCircle2, XCircle, AlertCircle, Send, Trash2 } from 'lucide-react';
+
+const STATUS_MAP = {
+  pending:  { bg: 'bg-amber-500/10',  border: 'border-amber-500/20',  text: 'text-amber-400'  },
+  approved: { bg: 'bg-emerald-500/10',border: 'border-emerald-500/20',text: 'text-emerald-400' },
+  rejected: { bg: 'bg-red-500/10',    border: 'border-red-500/20',    text: 'text-red-400'     },
+  cancelled:{ bg: 'bg-slate-500/10',  border: 'border-slate-500/20',  text: 'text-slate-400'   },
+};
+
+const LEAVE_TYPES = [
+  { value: 'casual',  label: 'Casual'  },
+  { value: 'sick',    label: 'Sick'    },
+  { value: 'earned',  label: 'Earned'  },
+  { value: 'unpaid',  label: 'Unpaid'  },
+  { value: 'other',   label: 'Other'   },
+];
+
+const StatCard = ({ Icon, label, value, accent }) => {
+  const clrs = {
+    amber:  'from-amber-500/10 to-amber-500/0 border-amber-500/20 text-amber-400',
+    emerald:'from-emerald-500/10 to-emerald-500/0 border-emerald-500/20 text-emerald-400',
+    white:  'from-white/5 to-white/0 border-white/10 text-white',
+  }[accent] || 'from-white/5 to-white/0 border-white/10 text-white';
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+      className={`rounded-2xl border bg-gradient-to-b p-5 ${clrs}`}>
+      <div className="flex items-center gap-2 mb-3">
+        <Icon className="w-4 h-4 opacity-60" />
+        <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{label}</p>
+      </div>
+      <p className="text-3xl font-black">{value}</p>
+    </motion.div>
+  );
+};
 
 const EmployeeLeavePage = () => {
   const { user } = useAuth();
@@ -14,19 +52,11 @@ const EmployeeLeavePage = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [cancellingId, setCancellingId] = useState('');
-  const [form, setForm] = useState({
-    leaveType: 'casual',
-    startDate: '',
-    endDate: '',
-    reason: '',
-  });
+  const [form, setForm] = useState({ leaveType: 'casual', startDate: '', endDate: '', reason: '' });
 
   const loadEmployee = async () => {
     const result = await employeeService.getEmployeeByUserId(user?._id);
-    if (result.success) {
-      setEmployeeId(result.data._id);
-      return result.data._id;
-    }
+    if (result.success) { setEmployeeId(result.data._id); return result.data._id; }
     return '';
   };
 
@@ -34,186 +64,193 @@ const EmployeeLeavePage = () => {
     try {
       setLoading(true);
       const result = await leaveService.getLeaves({ limit: 100 });
-      if (result.success) {
-        setLeaves(result.data || []);
-      }
-    } catch (err) {
-      setError('Failed to load leave history');
-    } finally {
-      setLoading(false);
-    }
+      if (result.success) setLeaves(result.data || []);
+    } catch (err) { setError('Failed to load leave history'); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => {
-    (async () => {
+    const initialize = async () => {
       try {
-        const id = await loadEmployee();
-        if (!id) {
-          setError('Employee record not found');
+        setLoading(true);
+        setError('');
+        
+        let id = '';
+        try {
+          const result = await employeeService.getEmployeeByUserId(user?._id);
+          if (result.success) {
+            id = result.data._id;
+            setEmployeeId(id);
+          }
+        } catch (e) {
+          // No employee profile linked yet
+          setError('No employee profile linked to your account. Please contact an admin.');
+          setLoading(false);
+          return;
         }
+
+        if (!id) {
+          setError('No employee record found for your account.');
+          setLoading(false);
+          return;
+        }
+
         await fetchLeaves();
       } catch (err) {
         setError('Failed to initialize leave page');
+        setLoading(false);
       }
-    })();
+    };
+
+    initialize();
   }, []);
 
   const submitLeave = async (e) => {
     e.preventDefault();
-    if (!employeeId) {
-      setError('Employee record not found');
-      return;
-    }
-
+    if (!employeeId) { setError('Employee record not found'); return; }
     try {
       setSubmitting(true);
       const result = await leaveService.requestLeave({ ...form, employeeId });
       if (result.success) {
         setForm({ leaveType: 'casual', startDate: '', endDate: '', reason: '' });
-        setLeaves((prev) => [result.data, ...prev]);
+        setLeaves(prev => [result.data, ...prev]);
         setError('');
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to submit leave request');
-    } finally {
-      setSubmitting(false);
-    }
+    } finally { setSubmitting(false); }
   };
 
   const cancelLeave = async (id) => {
+    if (!window.confirm('Cancel this pending leave request?')) return;
     try {
-      const proceed = window.confirm('Cancel this pending leave request?');
-      if (!proceed) return;
-
       setCancellingId(id);
       const result = await leaveService.deleteLeave(id);
-      if (result.success) {
-        setLeaves((prev) => prev.filter((item) => item._id !== id));
-      }
-    } catch (err) {
-      setError('Failed to cancel leave request');
-    } finally {
-      setCancellingId('');
-    }
+      if (result.success) setLeaves(prev => prev.filter(l => l._id !== id));
+    } catch (err) { setError('Failed to cancel leave'); }
+    finally { setCancellingId(''); }
   };
 
-  const columns = [
-    {
-      label: 'Type',
-      key: 'leaveType',
-      render: (value) => <span className="capitalize">{value}</span>,
-    },
-    {
-      label: 'Period',
-      render: (_, row) => `${new Date(row.startDate).toLocaleDateString()} - ${new Date(row.endDate).toLocaleDateString()}`,
-    },
-    {
-      label: 'Days',
-      key: 'daysCount',
-    },
-    {
-      label: 'Status',
-      key: 'status',
-      render: (value) => (
-        <Badge color={value === 'approved' ? 'green' : value === 'rejected' ? 'red' : value === 'pending' ? 'yellow' : 'gray'}>
-          {value}
-        </Badge>
-      ),
-    },
-    {
-      label: 'Action',
-      render: (_, row) => (
-        <Button size="sm" variant="danger" disabled={row.status !== 'pending'} onClick={() => cancelLeave(row._id)}>
-          Cancel
-        </Button>
-      ),
-    },
-  ];
+  const pending  = leaves.filter(l => l.status === 'pending').length;
+  const approved = leaves.filter(l => l.status === 'approved').length;
+  const total    = leaves.length;
 
   return (
     <AppShell>
       <PageHeader title="My Leaves" subtitle="Submit and track your leave requests" />
 
-      {error && <div className="mb-6 rounded border border-red-600/50 bg-red-900/20 p-4 text-sm text-red-400">{error}</div>}
+      {error && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="mb-6 flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-400">
+          <AlertCircle className="w-4 h-4 shrink-0" />{error}
+          <button onClick={() => setError('')} className="ml-auto text-red-400/50 hover:text-red-400">✕</button>
+        </motion.div>
+      )}
 
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card>
-          <p className="text-sm text-gray-400">Pending Requests</p>
-          <p className="text-3xl font-bold text-yellow-400">{leaves.filter((leave) => leave.status === 'pending').length}</p>
-        </Card>
-        <Card>
-          <p className="text-sm text-gray-400">Approved</p>
-          <p className="text-3xl font-bold text-green-400">{leaves.filter((leave) => leave.status === 'approved').length}</p>
-        </Card>
-        <Card>
-          <p className="text-sm text-gray-400">Total Requests</p>
-          <p className="text-3xl font-bold text-white">{leaves.length}</p>
-        </Card>
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <StatCard Icon={Clock}         label="Pending Requests" value={pending}  accent="amber"   />
+        <StatCard Icon={CheckCircle2}  label="Approved"         value={approved} accent="emerald" />
+        <StatCard Icon={CalendarOff}   label="Total Requests"   value={total}    accent="white"   />
       </div>
 
-      <div className="space-y-6">
-        <Card>
-          <h3 className="mb-4 text-lg font-semibold text-white">Request Leave</h3>
-          <form onSubmit={submitLeave} className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div>
-              <label className="mb-2 block text-sm text-gray-300">Leave Type</label>
-              <select
-                value={form.leaveType}
-                onChange={(e) => setForm((prev) => ({ ...prev, leaveType: e.target.value }))}
-                className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
-              >
-                <option value="casual">Casual</option>
-                <option value="sick">Sick</option>
-                <option value="earned">Earned</option>
-                <option value="unpaid">Unpaid</option>
-                <option value="other">Other</option>
-              </select>
+      <div className="space-y-5">
+        {/* Request Form */}
+        <BorderGlow borderRadius={28}>
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                <CalendarOff className="w-4 h-4 text-cyan-400" />
+              </div>
+              <h3 className="text-sm font-black text-white uppercase tracking-widest">Request Leave</h3>
             </div>
+            <form onSubmit={submitLeave} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <GlassSelect label="Leave Type" value={form.leaveType}
+                onChange={v => setForm(p => ({ ...p, leaveType: v }))} options={LEAVE_TYPES} />
+              <Input label="Start Date" type="date" value={form.startDate}
+                onChange={e => setForm(p => ({ ...p, startDate: e.target.value }))} required />
+              <Input label="End Date" type="date" value={form.endDate}
+                onChange={e => setForm(p => ({ ...p, endDate: e.target.value }))} required />
+              <div className="md:col-span-2">
+                <label className="mb-2 block text-[11px] font-black uppercase tracking-widest text-slate-500">Reason *</label>
+                <textarea value={form.reason}
+                  onChange={e => setForm(p => ({ ...p, reason: e.target.value }))}
+                  rows={3} required placeholder="Brief reason for leave…"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 resize-none transition-all"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <motion.button type="submit" disabled={submitting}
+                  whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-black uppercase tracking-widest shadow-lg shadow-cyan-500/20 transition-all disabled:opacity-50">
+                  <Send className="w-4 h-4" />{submitting ? 'Submitting…' : 'Submit Request'}
+                </motion.button>
+              </div>
+            </form>
+          </div>
+        </BorderGlow>
 
-            <Input
-              label="Start Date"
-              type="date"
-              value={form.startDate}
-              onChange={(e) => setForm((prev) => ({ ...prev, startDate: e.target.value }))}
-              required
-            />
-
-            <Input
-              label="End Date"
-              type="date"
-              value={form.endDate}
-              onChange={(e) => setForm((prev) => ({ ...prev, endDate: e.target.value }))}
-              required
-            />
-
-            <div className="md:col-span-2">
-              <label className="mb-2 block text-sm text-gray-300">Reason</label>
-              <textarea
-                value={form.reason}
-                onChange={(e) => setForm((prev) => ({ ...prev, reason: e.target.value }))}
-                className="w-full rounded border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white"
-                rows="3"
-                required
-              />
+        {/* Leave History */}
+        <BorderGlow borderRadius={28}>
+          <div className="p-6">
+            <div className="flex items-center gap-3 mb-5">
+              <h3 className="text-sm font-black text-white">Leave History</h3>
+              <span className="ml-auto text-[10px] text-slate-600 font-bold">{total} total</span>
             </div>
-
-            <div className="md:col-span-2">
-              <Button type="submit" disabled={submitting}>
-                {submitting ? 'Submitting...' : 'Submit Request'}
-              </Button>
-            </div>
-          </form>
-        </Card>
-
-        <Card>
-          {loading ? (
-            <div className="py-10 text-center text-gray-400">Loading leave history...</div>
-          ) : leaves.length === 0 ? (
-            <div className="py-10 text-center text-gray-400">No leave requests yet. Submit your first request above.</div>
-          ) : (
-            <Table columns={columns} data={leaves} />
-          )}
-        </Card>
+            {loading ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <div className="w-6 h-6 border-2 border-white/20 border-t-cyan-400 rounded-full animate-spin" />
+                <p className="text-slate-500 text-sm">Loading history…</p>
+              </div>
+            ) : leaves.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <CalendarOff className="w-10 h-10 text-slate-700" />
+                <p className="text-slate-500 text-sm">No leave requests yet</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <div className="grid grid-cols-12 gap-4 px-4 pb-3 border-b border-white/5">
+                  {['Type', 'Period', 'Days', 'Status', 'Action'].map((h, i) => (
+                    <div key={h} className={`${i === 1 ? 'col-span-3' : i === 0 ? 'col-span-2' : i === 4 ? 'col-span-2' : 'col-span-2'} text-[10px] font-black uppercase tracking-widest text-slate-600`}>{h}</div>
+                  ))}
+                </div>
+                <AnimatePresence mode="popLayout">
+                  {leaves.map((leave, idx) => {
+                    const cfg = STATUS_MAP[leave.status] || STATUS_MAP.pending;
+                    return (
+                      <motion.div key={leave._id} layout
+                        initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.04 }}
+                        className="grid grid-cols-12 gap-4 items-center px-4 py-3.5 rounded-2xl hover:bg-white/[0.04] transition-all border border-transparent hover:border-white/5">
+                        <div className="col-span-2 text-xs text-white font-bold capitalize">{leave.leaveType}</div>
+                        <div className="col-span-3 text-xs text-slate-400">
+                          {new Date(leave.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          {' — '}
+                          {new Date(leave.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </div>
+                        <div className="col-span-2 text-xs text-slate-300 font-bold">{leave.daysCount || '—'} d</div>
+                        <div className="col-span-3">
+                          <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black border ${cfg.bg} ${cfg.border} ${cfg.text}`}>
+                            {leave.status}
+                          </span>
+                        </div>
+                        <div className="col-span-2">
+                          {leave.status === 'pending' && (
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                              disabled={cancellingId === leave._id}
+                              onClick={() => cancelLeave(leave._id)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] font-black hover:bg-red-500/20 transition-all disabled:opacity-40">
+                              <Trash2 className="w-3 h-3" /> Cancel
+                            </motion.button>
+                          )}
+                        </div>
+                      </motion.div>
+                    );
+                  })}
+                </AnimatePresence>
+              </div>
+            )}
+          </div>
+        </BorderGlow>
       </div>
     </AppShell>
   );

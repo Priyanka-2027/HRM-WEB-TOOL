@@ -4,12 +4,50 @@ import PageHeader from '../components/layout/PageHeader';
 import BorderGlow from '../components/ui/BorderGlow';
 import { dashboardService } from '../api/dashboardService';
 import { announcementService } from '../api/announcementService';
-import { Users, UserCheck, Clock, BookOpen, TrendingUp, AlertCircle, Megaphone, PieChart as PieIcon, BarChart3 } from 'lucide-react';
+import {
+  Users, UserCheck, Clock, BookOpen, AlertCircle, Megaphone, Send,
+  TrendingUp, ArrowUpRight, Zap
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
-  Cell, PieChart, Pie, Legend 
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Cell,
+  PieChart, Pie, Legend
 } from 'recharts';
+
+const GlassTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{ background: 'rgba(8,8,18,0.97)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 16, padding: '10px 14px', backdropFilter: 'blur(20px)' }}>
+      {label && <p style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255,255,255,0.3)', marginBottom: 6 }}>{label}</p>}
+      {payload.map((p, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+          <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.fill || p.color, display: 'inline-block' }} />
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', textTransform: 'capitalize' }}>{p.name || p.dataKey}</span>
+          <span style={{ fontSize: 12, fontWeight: 900, color: '#fff', marginLeft: 8 }}>{p.value}</span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Custom gradient bar shape
+const GradientBar = (props) => {
+  const { x, y, width, height, fill } = props;
+  if (!height || height <= 0) return null;
+  const id = `bar-grad-${fill?.replace('#', '')}`;
+  return (
+    <g>
+      <defs>
+        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={fill} stopOpacity={1} />
+          <stop offset="100%" stopColor={fill} stopOpacity={0.25} />
+        </linearGradient>
+      </defs>
+      <rect x={x} y={y} width={width} height={height} rx={8} ry={8} fill={`url(#${id})`} />
+    </g>
+  );
+};
 
 const AdminDashboardPage = () => {
   const [summary, setSummary] = useState(null);
@@ -22,9 +60,7 @@ const AdminDashboardPage = () => {
     try {
       const res = await announcementService.getAnnouncements();
       if (res.success) setAnnouncements(res.data);
-    } catch (err) {
-      console.error(err);
-    }
+    } catch (err) { console.error(err); }
   };
 
   useEffect(() => {
@@ -33,9 +69,7 @@ const AdminDashboardPage = () => {
         const result = await dashboardService.getAdminSummary();
         if (result.success) setSummary(result.data);
         await loadAnnouncements();
-      } catch (err) {
-        setError('Failed to load dashboard insights');
-      }
+      } catch (err) { setError('Failed to load dashboard insights'); }
     })();
   }, []);
 
@@ -47,95 +81,74 @@ const AdminDashboardPage = () => {
       await announcementService.createAnnouncement(newAnnouncement);
       setNewAnnouncement({ title: '', message: '' });
       await loadAnnouncements();
-    } catch (err) {
-      setError('Failed to post announcement');
-    } finally {
-      setIsSubmitting(false);
-    }
+    } catch (err) { setError('Failed to post announcement'); }
+    finally { setIsSubmitting(false); }
   };
 
-  const cards = summary?.cards || {
-    totalEmployees: 0,
-    activeEmployees: 0,
-    pendingLeaves: 0,
-    totalSkills: 0,
-  };
+  const cards = summary?.cards || { totalEmployees: 0, activeEmployees: 0, pendingLeaves: 0, totalSkills: 0 };
 
   const attendanceData = useMemo(() => {
     const raw = summary?.attendanceToday || { present: 0, absent: 0, late: 0, halfDay: 0, onLeave: 0 };
-    return Object.entries(raw).map(([key, value]) => ({
-      name: key.replace(/([A-Z])/g, ' $1').trim(),
-      value,
-      fullKey: key
-    }));
+    return [
+      { name: 'Present',  value: raw.present,  fill: '#22d3ee' },
+      { name: 'Absent',   value: raw.absent,   fill: '#ef4444' },
+      { name: 'Late',     value: raw.late,     fill: '#f59e0b' },
+      { name: 'Half Day', value: raw.halfDay,  fill: '#fb923c' },
+      { name: 'On Leave', value: raw.onLeave,  fill: '#a78bfa' },
+    ];
   }, [summary]);
 
   const leaveData = useMemo(() => {
     const raw = summary?.leaveStatus || { pending: 0, approved: 0, rejected: 0, cancelled: 0 };
-    return Object.entries(raw).map(([key, value]) => ({ name: key, value }));
+    return [
+      { name: 'Pending',   value: raw.pending,   fill: '#f59e0b' },
+      { name: 'Approved',  value: raw.approved,  fill: '#10b981' },
+      { name: 'Rejected',  value: raw.rejected,  fill: '#ef4444' },
+      { name: 'Cancelled', value: raw.cancelled, fill: '#6b7280' },
+    ];
   }, [summary]);
 
-  const ATTENDANCE_COLORS = {
-    present: '#22d3ee',
-    absent: '#ef4444',
-    late: '#f59e0b',
-    halfDay: '#fb923c',
-    onLeave: '#a78bfa',
-  };
-
-  const LEAVE_COLORS = ['#f59e0b', '#10b981', '#ef4444', '#6b7280'];
-
   const kpiCards = [
-    { key: 'totalEmployees', label: 'Total Workforce', Icon: Users, color: '#a78bfa', glow: '260 70 75' },
-    { key: 'activeEmployees', label: 'Active Now', Icon: UserCheck, color: '#22d3ee', glow: '200 85 65' },
-    { key: 'pendingLeaves', label: 'Pending Requests', Icon: Clock, color: '#fbbf24', glow: '38 90 65' },
-    { key: 'totalSkills', label: 'Skill Library', Icon: BookOpen, color: '#34d399', glow: '160 75 60' },
+    { key: 'totalEmployees',  label: 'Total Workforce',  Icon: Users,      color: '#a78bfa', sub: 'Registered' },
+    { key: 'activeEmployees', label: 'Active Today',     Icon: UserCheck,  color: '#22d3ee', sub: 'On duty'    },
+    { key: 'pendingLeaves',   label: 'Pending Requests', Icon: Clock,      color: '#fbbf24', sub: 'Needs review'},
+    { key: 'totalSkills',     label: 'Skill Modules',    Icon: BookOpen,   color: '#34d399', sub: 'All teams'  },
   ];
 
   return (
     <AppShell userRole="admin">
-      <PageHeader
-        title="Admin Analytics"
-        subtitle="Comprehensive overview of organizational health"
-      />
+      <PageHeader title="Analytics Hub" subtitle="Live organizational health metrics and insights" />
 
       {error && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="mb-8 flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 backdrop-blur-md px-5 py-4 text-sm text-red-400"
-        >
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          {error}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="mb-8 flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-400">
+          <AlertCircle className="w-4 h-4 shrink-0" />{error}
         </motion.div>
       )}
 
-      {/* KPI Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {kpiCards.map(({ key, label, Icon, color, glow }, idx) => (
-          <motion.div
-            key={key}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: idx * 0.1 }}
-          >
-            <BorderGlow
-              glowColor={glow}
-              colors={[color, color, color]}
-              backgroundColor="rgba(15, 17, 26, 0.5)"
-              borderRadius={28}
-              glowIntensity={0.8}
-              animated
-            >
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm font-medium text-slate-400 capitalize">{label}</p>
-                  <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
-                    <Icon className="w-5 h-5" style={{ color }} />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        {kpiCards.map(({ key, label, Icon, color, sub }, idx) => (
+          <motion.div key={key} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.09 }}>
+            <BorderGlow borderRadius={26}>
+              <div className="p-6 relative overflow-hidden">
+                <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full blur-2xl opacity-20" style={{ background: color }} />
+                <div className="relative">
+                  <div className="flex items-start justify-between mb-5">
+                    <div>
+                      <p className="text-[11px] font-bold uppercase tracking-widest text-slate-500">{label}</p>
+                      <p className="text-[10px] text-slate-600 mt-0.5">{sub}</p>
+                    </div>
+                    <div className="p-2.5 rounded-xl bg-white/5 border border-white/10">
+                      <Icon className="w-4 h-4" style={{ color }} />
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold tracking-tight text-white">{cards[key]}</span>
+                  <div className="flex items-end justify-between">
+                    <span className="text-4xl font-black text-white tabular-nums">{cards[key]}</span>
+                    <span className="text-[10px] font-bold text-emerald-400 mb-1 flex items-center gap-0.5">
+                      <ArrowUpRight className="w-3 h-3" />Live
+                    </span>
+                  </div>
                 </div>
               </div>
             </BorderGlow>
@@ -143,47 +156,33 @@ const AdminDashboardPage = () => {
         ))}
       </div>
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
-        {/* Main Attendance Chart */}
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-6">
+        {/* Attendance Bar Chart */}
         <div className="lg:col-span-8">
-          <BorderGlow glowColor="200 85 65" colors={['#22d3ee', '#06b6d4']} borderRadius={28}>
-            <div className="p-6 h-[400px] flex flex-col">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <BarChart3 className="w-5 h-5 text-cyan-400" />
-                  <h3 className="text-lg font-semibold text-white">Daily Attendance Distribution</h3>
+          <BorderGlow borderRadius={28}>
+            <div className="p-6 h-[380px] flex flex-col">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                  <Zap className="w-4 h-4 text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Today's Attendance Breakdown</h3>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Real-time workforce distribution</p>
                 </div>
               </div>
               <div className="flex-1 min-h-0">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={attendanceData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 12 }} 
-                      dy={10}
-                    />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: 'rgba(255,255,255,0.4)', fontSize: 12 }}
-                    />
-                    <Tooltip 
-                      cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(15, 17, 26, 0.9)', 
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '12px',
-                        backdropFilter: 'blur(10px)'
-                      }}
-                      itemStyle={{ color: '#fff' }}
-                    />
-                    <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                      {attendanceData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={ATTENDANCE_COLORS[entry.fullKey] || '#22d3ee'} />
+                  <BarChart data={attendanceData} barCategoryGap="35%">
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false}
+                      tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11 }} dy={8} />
+                    <YAxis axisLine={false} tickLine={false}
+                      tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: 10 }} />
+                    <Tooltip content={<GlassTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
+                    <Bar dataKey="value" maxBarSize={56} shape={<GradientBar />}>
+                      {attendanceData.map((d, i) => (
+                        <Cell key={i} fill={d.fill} />
                       ))}
                     </Bar>
                   </BarChart>
@@ -193,42 +192,33 @@ const AdminDashboardPage = () => {
           </BorderGlow>
         </div>
 
-        {/* Leave Pie Chart */}
+        {/* Leave Donut */}
         <div className="lg:col-span-4">
-          <BorderGlow glowColor="38 90 65" colors={['#fbbf24', '#f59e0b']} borderRadius={28}>
-            <div className="p-6 h-[400px] flex flex-col">
+          <BorderGlow borderRadius={28}>
+            <div className="p-6 h-[380px] flex flex-col">
               <div className="flex items-center gap-3 mb-6">
-                <PieIcon className="w-5 h-5 text-amber-400" />
-                <h3 className="text-lg font-semibold text-white">Leave Status</h3>
+                <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                  <Clock className="w-4 h-4 text-amber-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-white">Leave Status</h3>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Distribution overview</p>
+                </div>
               </div>
               <div className="flex-1 min-h-0">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
-                    <Pie
-                      data={leaveData}
-                      cx="50%"
-                      cy="45%"
-                      innerRadius={65}
-                      outerRadius={85}
-                      paddingAngle={8}
-                      dataKey="value"
-                    >
-                      {leaveData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={LEAVE_COLORS[index % LEAVE_COLORS.length]} />
+                    <Pie data={leaveData} cx="50%" cy="42%" innerRadius={55} outerRadius={78}
+                      paddingAngle={6} dataKey="value" strokeWidth={0}>
+                      {leaveData.map((entry, i) => (
+                        <Cell key={i} fill={entry.fill} />
                       ))}
                     </Pie>
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'rgba(15, 17, 26, 0.9)', 
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '12px'
-                      }}
-                    />
-                    <Legend 
-                      verticalAlign="bottom" 
-                      height={36} 
-                      formatter={(value) => <span className="text-xs text-slate-400 capitalize">{value}</span>}
-                    />
+                    <Tooltip content={<GlassTooltip />} />
+                    <Legend verticalAlign="bottom" height={44}
+                      formatter={(value) => (
+                        <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{value}</span>
+                      )} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -237,92 +227,93 @@ const AdminDashboardPage = () => {
         </div>
       </div>
 
+      {/* Bottom Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Skills Card */}
-        <BorderGlow glowColor="160 75 60" colors={['#34d399', '#10b981']} borderRadius={28}>
+        {/* Top Skills */}
+        <BorderGlow borderRadius={28}>
           <div className="p-6">
             <div className="flex items-center gap-3 mb-6">
-              <BookOpen className="w-5 h-5 text-emerald-400" />
-              <h3 className="text-lg font-semibold text-white">Skill Proficiency</h3>
+              <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                <TrendingUp className="w-4 h-4 text-emerald-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Top Skill Competencies</h3>
+                <p className="text-[10px] text-slate-500 mt-0.5">Most endorsed capabilities</p>
+              </div>
             </div>
-            {summary?.topSkills?.length === 0 ? (
-              <div className="py-12 text-center text-slate-500 italic">No skill data available.</div>
+            {!summary?.topSkills?.length ? (
+              <div className="py-10 text-center text-slate-600 text-sm italic">No skill data yet</div>
             ) : (
               <div className="space-y-4">
-                {summary?.topSkills?.slice(0, 5).map((skill, idx) => (
-                  <motion.div
-                    key={skill._id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="group relative flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-emerald-500/30 transition-all hover:bg-white/[0.07]"
-                  >
-                    <div>
-                      <h4 className="text-sm font-semibold text-white">{skill._id}</h4>
-                      <p className="text-xs text-slate-500 mt-1">
-                        High competence across {skill.assignedCount} individuals
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-emerald-400 font-bold">{skill.assignedCount}</div>
-                      <div className="text-[10px] text-slate-500 uppercase tracking-wider">Members</div>
-                    </div>
-                  </motion.div>
-                ))}
+                {summary.topSkills.slice(0, 5).map((skill, idx) => {
+                  const pct = Math.min(100, (skill.assignedCount / 5) * 100);
+                  const colors = ['#22d3ee', '#a78bfa', '#34d399', '#fbbf24', '#fb923c'];
+                  const c = colors[idx % colors.length];
+                  return (
+                    <motion.div key={skill._id}
+                      initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.08 }}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs font-bold text-white">{skill._id}</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: c }}>
+                          {skill.assignedCount} members
+                        </span>
+                      </div>
+                      <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                        <motion.div className="h-full rounded-full"
+                          style={{ background: `linear-gradient(90deg, ${c}88, ${c})` }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${pct}%` }}
+                          transition={{ delay: 0.3 + idx * 0.1, duration: 0.8, ease: 'easeOut' }}
+                        />
+                      </div>
+                    </motion.div>
+                  );
+                })}
               </div>
             )}
           </div>
         </BorderGlow>
 
-        {/* Announcements/Notice Board */}
-        <BorderGlow glowColor="260 70 75" colors={['#a78bfa', '#818cf8']} borderRadius={28}>
+        {/* Notice Board */}
+        <BorderGlow borderRadius={28}>
           <div className="p-6">
             <div className="flex items-center gap-3 mb-6">
-              <Megaphone className="w-5 h-5 text-violet-400" />
-              <h3 className="text-lg font-semibold text-white">Notice Board</h3>
+              <div className="p-2 rounded-lg bg-violet-500/10 border border-violet-500/20">
+                <Megaphone className="w-4 h-4 text-violet-400" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">Broadcast Center</h3>
+                <p className="text-[10px] text-slate-500 mt-0.5">Post company-wide announcements</p>
+              </div>
             </div>
-            
-            <form onSubmit={handlePostAnnouncement} className="mb-6 space-y-3">
-              <input
-                type="text"
-                placeholder="Subject line"
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm transition-all focus:border-violet-500/50 outline-none"
+            <form onSubmit={handlePostAnnouncement} className="mb-5 space-y-3">
+              <input type="text" placeholder="Subject line…"
+                className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-violet-500/50 outline-none transition-all"
                 value={newAnnouncement.title}
-                onChange={(e) => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
-                required
-              />
-              <textarea
-                placeholder="Write your message..."
-                className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm h-24 resize-none transition-all focus:border-violet-500/50 outline-none"
+                onChange={e => setNewAnnouncement({ ...newAnnouncement, title: e.target.value })}
+                required />
+              <textarea placeholder="Write your message…"
+                className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 h-20 resize-none focus:border-violet-500/50 outline-none transition-all"
                 value={newAnnouncement.message}
-                onChange={(e) => setNewAnnouncement({ ...newAnnouncement, message: e.target.value })}
-                required
-              />
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-sm font-semibold transition-all disabled:opacity-50 shadow-lg shadow-violet-900/20"
-              >
-                {isSubmitting ? 'Verifying...' : 'Broadcast Announcement'}
+                onChange={e => setNewAnnouncement({ ...newAnnouncement, message: e.target.value })}
+                required />
+              <button type="submit" disabled={isSubmitting}
+                className="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-xs font-black uppercase tracking-widest transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                <Send className="w-3.5 h-3.5" />
+                {isSubmitting ? 'Sending...' : 'Broadcast'}
               </button>
             </form>
-
-            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-3 max-h-[220px] overflow-y-auto pr-1">
               <AnimatePresence mode="popLayout">
-                {announcements.map((ann) => (
-                  <motion.div
-                    key={ann._id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    className="p-4 rounded-xl bg-white/5 border border-white/5"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="text-sm font-semibold text-slate-200">{ann.title}</h4>
-                      <span className="text-[10px] text-slate-500">{new Date(ann.createdAt).toLocaleDateString()}</span>
+                {announcements.map(ann => (
+                  <motion.div key={ann._id} layout
+                    initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }}
+                    className="p-4 rounded-xl bg-white/4 border border-white/5 group hover:border-violet-500/20 transition-all">
+                    <div className="flex justify-between items-start mb-1.5">
+                      <h4 className="text-xs font-bold text-white group-hover:text-violet-300 transition-colors">{ann.title}</h4>
+                      <span className="text-[10px] text-slate-600 shrink-0 ml-2">{new Date(ann.createdAt).toLocaleDateString()}</span>
                     </div>
-                    <p className="text-xs text-slate-400 leading-relaxed">{ann.message}</p>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">{ann.message}</p>
                   </motion.div>
                 ))}
               </AnimatePresence>

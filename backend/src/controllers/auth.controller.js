@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Employee from '../models/Employee.js';
 import { env } from '../config/env.js';
 import { sendResponse, sendError } from '../utils/response.js';
 
@@ -32,7 +33,17 @@ export const register = async (req, res, next) => {
       firstName,
       lastName,
       password,
-      role: 'employee',
+      role: 'employee', // Default to employee role
+    });
+
+    // Automatically create a default Employee profile
+    await Employee.create({
+      userId: user._id,
+      email: user.email,
+      designation: 'Unassigned',
+      department: 'Pending Onboarding',
+      dateOfJoining: new Date(),
+      status: 'active'
     });
 
     // Generate token

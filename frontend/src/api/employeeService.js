@@ -1,6 +1,6 @@
 import axios from './axios';
 
-const API_URL = '/api/v1/employees';
+const API_URL = '/employees';
 
 export const employeeService = {
   // Get all employees with filters

@@ -1,6 +1,6 @@
 import axios from './axios';
 
-const API_URL = '/api/v1/attendance';
+const API_URL = '/attendance';
 
 export const attendanceService = {
   // Mark attendance

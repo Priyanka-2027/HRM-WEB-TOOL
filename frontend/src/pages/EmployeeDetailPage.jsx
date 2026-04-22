@@ -2,8 +2,44 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import AppShell from '../components/layout/AppShell';
 import PageHeader from '../components/layout/PageHeader';
-import { Button, Card, Badge } from '../components/ui';
+import BorderGlow from '../components/ui/BorderGlow';
 import { employeeService } from '../api/employeeService';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  User, Briefcase, MapPin, PhoneCall, Mail, Calendar,
+  DollarSign, Pencil, Trash2, Clock, ArrowLeft,
+  ClipboardCheck, CalendarOff, Award, AlertCircle
+} from 'lucide-react';
+
+const STATUS_MAP = {
+  active:     { bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', text: 'text-emerald-400', dot: 'bg-emerald-400' },
+  inactive:   { bg: 'bg-red-500/10',     border: 'border-red-500/20',     text: 'text-red-400',     dot: 'bg-red-400'     },
+  'on-leave': { bg: 'bg-amber-500/10',   border: 'border-amber-500/20',   text: 'text-amber-400',   dot: 'bg-amber-400'   },
+};
+
+const InfoRow = ({ Icon, label, value }) => (
+  <div className="flex items-start gap-3 py-3 border-b border-white/4 last:border-0">
+    <div className="p-1.5 rounded-lg bg-white/5 mt-0.5 shrink-0">
+      <Icon className="w-3.5 h-3.5 text-slate-500" />
+    </div>
+    <div className="min-w-0">
+      <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 mb-0.5">{label}</p>
+      <p className="text-sm text-white font-medium truncate">{value || <span className="text-slate-600 italic">Not provided</span>}</p>
+    </div>
+  </div>
+);
+
+const QuickAction = ({ Icon, label, color, onClick }) => (
+  <motion.button
+    whileHover={{ scale: 1.02, x: 4 }} whileTap={{ scale: 0.98 }}
+    onClick={onClick}
+    className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all border ${color}`}
+  >
+    <Icon className="w-4 h-4 shrink-0" />{label}
+  </motion.button>
+);
+
+const avatarColors = ['#22d3ee', '#a78bfa', '#34d399', '#fbbf24', '#fb923c', '#f472b6'];
 
 const EmployeeDetailPage = () => {
   const navigate = useNavigate();
@@ -12,47 +48,34 @@ const EmployeeDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchEmployee();
-  }, [id]);
+  useEffect(() => { fetchEmployee(); }, [id]);
 
   const fetchEmployee = async () => {
     try {
       setLoading(true);
       const result = await employeeService.getEmployee(id);
-      if (result.success) {
-        setEmployee(result.data);
-      } else {
-        setError(result.message || 'Failed to fetch employee');
-      }
+      if (result.success) setEmployee(result.data);
+      else setError(result.message || 'Failed to fetch employee');
     } catch (err) {
       setError('Error fetching employee');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Are you sure you want to delete this employee?')) {
-      try {
-        const result = await employeeService.deleteEmployee(id);
-        if (result.success) {
-          navigate('/admin/employees');
-        }
-      } catch (err) {
-        setError('Error deleting employee');
-      }
-    }
+    if (!window.confirm('Permanently delete this employee? This cannot be undone.')) return;
+    try {
+      const result = await employeeService.deleteEmployee(id);
+      if (result.success) navigate('/admin/employees');
+    } catch (err) { setError('Error deleting employee'); }
   };
 
   if (loading) {
     return (
-      <AppShell>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500"></div>
-            <p className="mt-4 text-gray-400">Loading...</p>
+      <AppShell userRole="admin">
+        <div className="flex items-center justify-center py-32">
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-10 h-10 border-2 border-white/20 border-t-cyan-400 rounded-full animate-spin" />
+            <p className="text-slate-500 text-sm">Loading employee…</p>
           </div>
         </div>
       </AppShell>
@@ -61,200 +84,168 @@ const EmployeeDetailPage = () => {
 
   if (!employee) {
     return (
-      <AppShell>
-        <PageHeader title="Employee Not Found" />
-        <Card>
-          <p className="text-gray-400 text-center py-8">
-            The employee you're looking for doesn't exist.
-          </p>
-          <div className="text-center">
-            <Button onClick={() => navigate('/admin/employees')}>
-              Back to Employees
-            </Button>
-          </div>
-        </Card>
+      <AppShell userRole="admin">
+        <div className="flex flex-col items-center justify-center py-32 gap-4">
+          <AlertCircle className="w-12 h-12 text-slate-700" />
+          <p className="text-slate-400 text-sm">Employee not found.</p>
+          <button onClick={() => navigate('/admin/employees')}
+            className="px-5 py-2.5 rounded-xl bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-cyan-400 transition-all">
+            Back to Employees
+          </button>
+        </div>
       </AppShell>
     );
   }
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : null;
+  const initials = (employee.userId?.firstName?.[0] || employee.email?.[0] || 'E').toUpperCase();
+  const accentColor = avatarColors[id.charCodeAt(id.length - 1) % avatarColors.length];
+  const statusCfg = STATUS_MAP[employee.status] || STATUS_MAP.active;
+  const fullName = [employee.userId?.firstName, employee.userId?.lastName].filter(Boolean).join(' ') || employee.email;
 
   return (
-    <AppShell>
-      <PageHeader
-        title={`${employee.userId?.firstName} ${employee.userId?.lastName}`}
-        subtitle={employee.designation}
-      >
-        <div className="flex gap-2">
-          <Button onClick={() => navigate(`/admin/employees/${id}/edit`)}>
-            Edit
-          </Button>
-          <Button variant="danger" onClick={handleDelete}>
-            Delete
-          </Button>
-        </div>
-      </PageHeader>
+    <AppShell userRole="admin">
+      {/* Back + Header */}
+      <div className="mb-2">
+        <button onClick={() => navigate('/admin/employees')}
+          className="inline-flex items-center gap-1.5 text-[11px] font-bold text-slate-500 hover:text-white uppercase tracking-widest transition-colors mb-6">
+          <ArrowLeft className="w-3.5 h-3.5" /> All Employees
+        </button>
+        <PageHeader title={fullName} subtitle={`${employee.designation} · ${employee.department}`}>
+          <div className="flex gap-2">
+            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+              onClick={() => navigate(`/admin/employees/${id}/edit`)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-black uppercase tracking-widest hover:bg-cyan-500/20 transition-all">
+              <Pencil className="w-3.5 h-3.5" /> Edit
+            </motion.button>
+            <motion.button whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+              onClick={handleDelete}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-black uppercase tracking-widest hover:bg-red-500/20 transition-all">
+              <Trash2 className="w-3.5 h-3.5" /> Delete
+            </motion.button>
+          </div>
+        </PageHeader>
+      </div>
 
       {error && (
-        <div className="mb-6 p-4 bg-red-900/20 border border-red-600/50 rounded text-red-400 text-sm">
-          {error}
-        </div>
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+          className="mb-6 flex items-center gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-400">
+          <AlertCircle className="w-4 h-4 shrink-0" />{error}
+        </motion.div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Info */}
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Personal Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-sm text-gray-400">Email</p>
-                <p className="text-white font-medium">{employee.email}</p>
+        {/* Left — Profile hero */}
+        <div className="space-y-5">
+          {/* Avatar Card */}
+          <BorderGlow borderRadius={28}>
+            <div className="p-6 flex flex-col items-center text-center gap-4">
+              <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl font-black shadow-lg"
+                style={{ background: `${accentColor}20`, color: accentColor, border: `2px solid ${accentColor}30`, boxShadow: `0 0 30px ${accentColor}15` }}>
+                {initials}
               </div>
               <div>
-                <p className="text-sm text-gray-400">Phone Number</p>
-                <p className="text-white font-medium">
-                  {employee.phoneNumber || 'N/A'}
-                </p>
+                <h2 className="text-base font-black text-white mb-1">{fullName}</h2>
+                <p className="text-xs text-slate-500">{employee.designation}</p>
               </div>
-              <div>
-                <p className="text-sm text-gray-400">Date of Birth</p>
-                <p className="text-white font-medium">
-                  {employee.dateOfBirth
-                    ? formatDate(employee.dateOfBirth)
-                    : 'N/A'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Address</p>
-                <p className="text-white font-medium">
-                  {employee.address || 'N/A'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">City</p>
-                <p className="text-white font-medium">{employee.city || 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">State</p>
-                <p className="text-white font-medium">
-                  {employee.state || 'N/A'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Zip Code</p>
-                <p className="text-white font-medium">
-                  {employee.zipCode || 'N/A'}
-                </p>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${statusCfg.bg} ${statusCfg.border} ${statusCfg.text}`}>
+                <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${statusCfg.dot}`} />{employee.status}
+              </span>
+              {/* Stats row */}
+              <div className="w-full grid grid-cols-3 gap-2 pt-2 border-t border-white/5">
+                {[
+                  { label: 'Dept', value: employee.department?.slice(0, 6) || '—' },
+                  { label: 'Type', value: employee.employmentType?.slice(0, 4) || '—' },
+                  { label: 'Since', value: employee.dateOfJoining ? new Date(employee.dateOfJoining).getFullYear() : '—' },
+                ].map(({ label, value }) => (
+                  <div key={label} className="text-center">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-0.5">{label}</p>
+                    <p className="text-xs font-black text-white capitalize">{value}</p>
+                  </div>
+                ))}
               </div>
             </div>
-          </Card>
+          </BorderGlow>
 
-          <Card>
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Employment Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <p className="text-sm text-gray-400">Designation</p>
-                <p className="text-white font-medium">{employee.designation}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Department</p>
-                <p className="text-white font-medium">{employee.department}</p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Employment Type</p>
-                <p className="text-white font-medium capitalize">
-                  {employee.employmentType}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Date of Joining</p>
-                <p className="text-white font-medium">
-                  {formatDate(employee.dateOfJoining)}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Salary</p>
-                <p className="text-white font-medium">
-                  ${employee.salary ? employee.salary.toLocaleString() : 'N/A'}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-400">Status</p>
-                <Badge
-                  color={
-                    employee.status === 'active'
-                      ? 'green'
-                      : employee.status === 'inactive'
-                      ? 'red'
-                      : 'yellow'
-                  }
-                >
-                  {employee.status}
-                </Badge>
+          {/* Quick Actions */}
+          <BorderGlow borderRadius={24}>
+            <div className="p-5 space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 mb-3">Quick Actions</p>
+              <QuickAction Icon={Pencil} label="Edit Details"
+                color="text-cyan-400 border-cyan-500/20 bg-cyan-500/5 hover:bg-cyan-500/15"
+                onClick={() => navigate(`/admin/employees/${id}/edit`)} />
+              <QuickAction Icon={ClipboardCheck} label="View Attendance"
+                color="text-violet-400 border-violet-500/20 bg-violet-500/5 hover:bg-violet-500/15"
+                onClick={() => navigate(`/admin/attendance?employeeId=${id}`)} />
+              <QuickAction Icon={CalendarOff} label="View Leave Requests"
+                color="text-amber-400 border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/15"
+                onClick={() => navigate(`/admin/leaves?employeeId=${id}`)} />
+              <QuickAction Icon={Award} label="Assign Skills"
+                color="text-emerald-400 border-emerald-500/20 bg-emerald-500/5 hover:bg-emerald-500/15"
+                onClick={() => navigate(`/admin/skills`)} />
+            </div>
+          </BorderGlow>
+
+          {/* Meta */}
+          <BorderGlow borderRadius={24}>
+            <div className="p-5">
+              <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 mb-3">Record Info</p>
+              <div className="space-y-3 text-[11px]">
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Employee ID</span>
+                  <span className="text-slate-400 font-mono">{employee._id?.slice(-8)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Created</span>
+                  <span className="text-slate-400">{formatDate(employee.createdAt)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-600">Last Updated</span>
+                  <span className="text-slate-400">{formatDate(employee.updatedAt)}</span>
+                </div>
               </div>
             </div>
-          </Card>
+          </BorderGlow>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-6">
-          <Card>
-            <h3 className="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-            <div className="space-y-3">
-              <Button
-                className="w-full"
-                onClick={() => navigate(`/admin/employees/${id}/edit`)}
-              >
-                Edit Details
-              </Button>
-              <Button variant="secondary" className="w-full">
-                View Attendance
-              </Button>
-              <Button variant="secondary" className="w-full">
-                View Leave Requests
-              </Button>
-              <Button variant="secondary" className="w-full">
-                Assign Skills
-              </Button>
+        {/* Right — Details */}
+        <div className="lg:col-span-2 space-y-5">
+          {/* Personal Info */}
+          <BorderGlow borderRadius={28}>
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
+                  <User className="w-4 h-4 text-cyan-400" />
+                </div>
+                <h3 className="text-sm font-black text-white uppercase tracking-widest">Personal Information</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
+                <InfoRow Icon={Mail}     label="Email"         value={employee.email} />
+                <InfoRow Icon={PhoneCall} label="Phone"        value={employee.phoneNumber} />
+                <InfoRow Icon={Calendar} label="Date of Birth" value={formatDate(employee.dateOfBirth)} />
+                <InfoRow Icon={MapPin}   label="Address"       value={[employee.address, employee.city, employee.state, employee.zipCode].filter(Boolean).join(', ')} />
+              </div>
             </div>
-          </Card>
+          </BorderGlow>
 
-          <Card>
-            <h3 className="text-lg font-semibold text-white mb-4">
-              Additional Info
-            </h3>
-            <div className="space-y-3 text-sm">
-              <div>
-                <p className="text-gray-400">Created</p>
-                <p className="text-gray-300">
-                  {formatDate(employee.createdAt)}
-                </p>
+          {/* Employment Info */}
+          <BorderGlow borderRadius={28}>
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="p-2 rounded-lg bg-violet-500/10 border border-violet-500/20">
+                  <Briefcase className="w-4 h-4 text-violet-400" />
+                </div>
+                <h3 className="text-sm font-black text-white uppercase tracking-widest">Employment Information</h3>
               </div>
-              <div>
-                <p className="text-gray-400">Last Updated</p>
-                <p className="text-gray-300">
-                  {formatDate(employee.updatedAt)}
-                </p>
-              </div>
-              <div>
-                <p className="text-gray-400">Employee ID</p>
-                <p className="text-gray-300 font-mono text-xs break-all">
-                  {employee._id}
-                </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8">
+                <InfoRow Icon={Briefcase}   label="Designation"      value={employee.designation} />
+                <InfoRow Icon={Briefcase}   label="Department"       value={employee.department} />
+                <InfoRow Icon={Clock}       label="Employment Type"  value={employee.employmentType} />
+                <InfoRow Icon={Calendar}    label="Date of Joining"  value={formatDate(employee.dateOfJoining)} />
+                <InfoRow Icon={DollarSign}  label="Annual Salary"    value={employee.salary ? `$${employee.salary.toLocaleString()}` : null} />
               </div>
             </div>
-          </Card>
+          </BorderGlow>
         </div>
       </div>
     </AppShell>

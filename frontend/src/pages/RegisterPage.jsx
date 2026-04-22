@@ -27,14 +27,37 @@ const RegisterPage = () => {
     if (serverError) setServerError('');
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+    if (!formData.firstName.trim()) newErrors.firstName = 'First name required';
+    if (!formData.lastName.trim()) newErrors.lastName = 'Last name required';
+    
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = 'Invalid email format';
+    }
+    
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Minimum 8 characters';
+    } else if (!/[A-Za-z]/.test(formData.password) || !/[0-9]/.test(formData.password)) {
+      newErrors.password = 'Must include letter & number';
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    
+    return newErrors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const newErrors = {};
-    if (!formData.firstName) newErrors.firstName = 'First Name is required';
-    if (!formData.lastName) newErrors.lastName = 'Last Name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.password) newErrors.password = 'Password is required';
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+    const newErrors = validateForm();
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -146,6 +169,7 @@ const RegisterPage = () => {
                           required
                         />
                       </div>
+                      {errors.email && <p className="text-[10px] text-red-400 ml-1 mt-1">{errors.email}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -163,6 +187,7 @@ const RegisterPage = () => {
                           required
                         />
                       </div>
+                      {errors.password && <p className="text-[10px] text-red-400 ml-1 mt-1">{errors.password}</p>}
                     </div>
 
                     <div className="space-y-2">
