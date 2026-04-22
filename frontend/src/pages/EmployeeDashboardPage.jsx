@@ -2,13 +2,67 @@ import { useEffect, useState } from 'react';
 import AppShell from '../components/layout/AppShell';
 import PageHeader from '../components/layout/PageHeader';
 import Card from '../components/ui/Card';
+import BorderGlow from '../components/ui/BorderGlow';
 import { dashboardService } from '../api/dashboardService';
 import { announcementService } from '../api/announcementService';
 import { payrollService } from '../api/payrollService';
-import { CalendarCheck, BookOpen, Clock, Activity, Coins } from 'lucide-react';
+import { CalendarCheck, BookOpen, Clock, Activity, Coins, AlertCircle, Megaphone } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const MAX_BAR = 100;
+
+const ATTENDANCE_COLORS = {
+  present: { bar: 'from-cyan-500 to-cyan-400',    text: 'text-cyan-400'    },
+  absent:  { bar: 'from-red-500 to-red-400',      text: 'text-red-400'     },
+  late:    { bar: 'from-amber-500 to-amber-400',  text: 'text-amber-400'   },
+  halfDay: { bar: 'from-orange-500 to-orange-400',text: 'text-orange-400'  },
+  onLeave: { bar: 'from-purple-500 to-purple-400',text: 'text-purple-400'  },
+};
+
+const SKILL_COLORS = ['from-cyan-500 to-cyan-400', 'from-violet-500 to-violet-400', 'from-emerald-500 to-emerald-400', 'from-amber-500 to-amber-400', 'from-pink-500 to-pink-400'];
+
+const kpiCards = [
+  {
+    key: 'attendanceThisMonth',
+    label: 'My Attendance',
+    Icon: CalendarCheck,
+    glowColor: '200 85 65',
+    colors: ['#22d3ee', '#06b6d4', '#67e8f9'],
+    valueClass: 'text-cyan-300',
+    iconClass: 'text-cyan-400',
+    iconBg: 'bg-cyan-500/15 border-cyan-500/20',
+  },
+  {
+    key: 'approvedLeaves',
+    label: 'Approved Leaves',
+    Icon: Clock,
+    glowColor: '160 75 60',
+    colors: ['#34d399', '#10b981', '#6ee7b7'],
+    valueClass: 'text-emerald-300',
+    iconClass: 'text-emerald-400',
+    iconBg: 'bg-emerald-500/15 border-emerald-500/20',
+  },
+  {
+    key: 'pendingLeaves',
+    label: 'Pending Leaves',
+    Icon: Activity,
+    glowColor: '38 90 65',
+    colors: ['#fbbf24', '#f59e0b', '#fcd34d'],
+    valueClass: 'text-amber-300',
+    iconClass: 'text-amber-400',
+    iconBg: 'bg-amber-500/15 border-amber-500/20',
+  },
+  {
+    key: 'skillsCount',
+    label: 'My Skills',
+    Icon: BookOpen,
+    glowColor: '260 70 75',
+    colors: ['#a78bfa', '#818cf8', '#c4b5fd'],
+    valueClass: 'text-violet-300',
+    iconClass: 'text-violet-400',
+    iconBg: 'bg-violet-500/15 border-violet-500/20',
+  },
+];
 
 const EmployeeDashboardPage = () => {
   const [summary, setSummary] = useState(null);
@@ -20,20 +74,14 @@ const EmployeeDashboardPage = () => {
     (async () => {
       try {
         const result = await dashboardService.getEmployeeSummary();
-        if (result.success) {
-          setSummary(result.data);
-        }
-        
+        if (result.success) setSummary(result.data);
+
         const annResult = await announcementService.getAnnouncements();
-        if (annResult.success) {
-          setAnnouncements(annResult.data);
-        }
+        if (annResult.success) setAnnouncements(annResult.data);
 
         const date = new Date();
         const payResult = await payrollService.getMyPayslip(date.getFullYear(), date.getMonth() + 1);
-        if (payResult.success) {
-          setPayslip(payResult.data);
-        }
+        if (payResult.success) setPayslip(payResult.data);
       } catch (err) {
         setError('Failed to load some dashboard insights');
       }
@@ -61,62 +109,75 @@ const EmployeeDashboardPage = () => {
 
   return (
     <AppShell userRole="employee">
-      <PageHeader 
-        title="My Dashboard" 
+      <PageHeader
+        title="My Dashboard"
         subtitle="Track your attendance, leaves, and skills"
       />
 
       {error && (
-        <div className="mb-6 rounded border border-red-600/50 bg-red-900/20 p-4 text-sm text-red-400">
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 backdrop-blur-sm px-4 py-3 text-sm text-red-400"
+        >
+          <AlertCircle className="w-4 h-4 shrink-0" />
           {error}
-        </div>
+        </motion.div>
       )}
-      
-      <motion.div 
+
+      {/* KPI Cards */}
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8"
       >
-        <Card>
-          <div className="flex justify-between items-start mb-1">
-            <div className="text-sm text-gray-400">My Attendance</div>
-            <CalendarCheck className="w-5 h-5 text-cyan-400" />
-          </div>
-          <div className="text-3xl font-bold text-cyan-400">{cards.attendanceThisMonth}</div>
-        </Card>
-        <Card>
-          <div className="flex justify-between items-start mb-1">
-            <div className="text-sm text-gray-400">Approved Leaves</div>
-            <Clock className="w-5 h-5 text-green-400" />
-          </div>
-          <div className="text-3xl font-bold text-green-400">{cards.approvedLeaves}</div>
-        </Card>
-        <Card>
-          <div className="flex justify-between items-start mb-1">
-            <div className="text-sm text-gray-400">Pending Leaves</div>
-            <Activity className="w-5 h-5 text-yellow-400" />
-          </div>
-          <div className="text-3xl font-bold text-yellow-400">{cards.pendingLeaves}</div>
-        </Card>
-        <Card>
-          <div className="flex justify-between items-start mb-1">
-            <div className="text-sm text-gray-400">My Skills</div>
-            <BookOpen className="w-5 h-5 text-white" />
-          </div>
-          <div className="text-3xl font-bold text-white">{cards.skillsCount}</div>
-        </Card>
+        {kpiCards.map(({ key, label, Icon, glowColor, colors, valueClass, iconClass, iconBg }, idx) => (
+          <motion.div
+            key={key}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.12 + idx * 0.07 }}
+          >
+            <BorderGlow
+              glowColor={glowColor}
+              colors={colors}
+              backgroundColor="rgba(6, 8, 20, 0.55)"
+              borderRadius={16}
+              glowRadius={36}
+              glowIntensity={1.0}
+              animated
+            >
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-sm font-medium text-white/60">{label}</span>
+                  <div className={`w-9 h-9 rounded-lg border flex items-center justify-center ${iconBg}`}>
+                    <Icon className={`w-5 h-5 ${iconClass}`} />
+                  </div>
+                </div>
+                <div className={`text-4xl font-bold tracking-tight ${valueClass}`}>
+                  {cards[key]}
+                </div>
+              </div>
+            </BorderGlow>
+          </motion.div>
+        ))}
       </motion.div>
-      
-      <motion.div 
+
+      {/* Charts Row */}
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+        transition={{ duration: 0.5, delay: 0.25 }}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-5"
       >
-        <Card>
-          <h3 className="text-lg font-semibold mb-4">Monthly Attendance</h3>
-          <div className="space-y-3">
+        {/* Monthly Attendance */}
+        <Card glowColor="200 85 65" colors={['#22d3ee', '#06b6d4', '#67e8f9']}>
+          <div className="flex items-center gap-2 mb-5">
+            <CalendarCheck className="w-5 h-5 text-cyan-400" />
+            <h3 className="text-base font-semibold text-white">Monthly Attendance</h3>
+          </div>
+          <div className="space-y-4">
             {[
               ['present', attendance.present],
               ['absent', attendance.absent],
@@ -125,36 +186,53 @@ const EmployeeDashboardPage = () => {
               ['onLeave', attendance.onLeave],
             ].map(([label, value]) => {
               const width = ((value || 0) / totalAttendance) * MAX_BAR;
+              const style = ATTENDANCE_COLORS[label] || { bar: 'from-cyan-500 to-cyan-400', text: 'text-cyan-400' };
               return (
                 <div key={label}>
-                  <div className="mb-1 flex justify-between text-sm text-gray-300">
-                    <span className="capitalize">{label}</span>
-                    <span>{value}</span>
+                  <div className="mb-1.5 flex justify-between text-sm">
+                    <span className="capitalize text-white/70">{label.replace(/([A-Z])/g, ' $1')}</span>
+                    <span className={`font-semibold ${style.text}`}>{value}</span>
                   </div>
-                  <div className="h-2 rounded bg-gray-800">
-                    <div className="h-2 rounded bg-cyan-500" style={{ width: `${width}%` }} />
+                  <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${width}%` }}
+                      transition={{ duration: 0.7, delay: 0.4, ease: 'easeOut' }}
+                      className={`h-full rounded-full bg-gradient-to-r ${style.bar}`}
+                    />
                   </div>
                 </div>
               );
             })}
           </div>
         </Card>
-        <Card>
-          <h3 className="text-lg font-semibold mb-4">My Skill Levels</h3>
+
+        {/* Skill Levels */}
+        <Card glowColor="260 70 75" colors={['#a78bfa', '#818cf8', '#c4b5fd']}>
+          <div className="flex items-center gap-2 mb-5">
+            <BookOpen className="w-5 h-5 text-violet-400" />
+            <h3 className="text-base font-semibold text-white">My Skill Levels</h3>
+          </div>
           {topSkills.length === 0 ? (
-            <div className="h-64 flex items-center justify-center text-gray-500">No skill data yet</div>
+            <div className="h-48 flex items-center justify-center text-white/30 text-sm">No skill data yet</div>
           ) : (
-            <div className="space-y-3">
-              {topSkills.map((skill) => {
+            <div className="space-y-4">
+              {topSkills.map((skill, idx) => {
                 const width = (skill.level / 5) * MAX_BAR;
+                const colorClass = SKILL_COLORS[idx % SKILL_COLORS.length];
                 return (
                   <div key={skill.name}>
-                    <div className="mb-1 flex justify-between text-sm text-gray-300">
-                      <span>{skill.name}</span>
-                      <span>Level {skill.level}/5</span>
+                    <div className="mb-1.5 flex justify-between text-sm">
+                      <span className="text-white/70">{skill.name}</span>
+                      <span className="text-violet-300 font-semibold">Level {skill.level}/5</span>
                     </div>
-                    <div className="h-2 rounded bg-gray-800">
-                      <div className="h-2 rounded bg-green-500" style={{ width: `${width}%` }} />
+                    <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${width}%` }}
+                        transition={{ duration: 0.7, delay: 0.4 + idx * 0.05, ease: 'easeOut' }}
+                        className={`h-full rounded-full bg-gradient-to-r ${colorClass}`}
+                      />
                     </div>
                   </div>
                 );
@@ -164,52 +242,65 @@ const EmployeeDashboardPage = () => {
         </Card>
       </motion.div>
 
-      <motion.div 
+      {/* Notice Board + Payroll */}
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6"
+        transition={{ duration: 0.5, delay: 0.35 }}
+        className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-5"
       >
-        <Card>
-          <h3 className="text-lg font-semibold mb-4">Notice Board</h3>
+        {/* Announcements */}
+        <Card glowColor="38 90 65" colors={['#fbbf24', '#f59e0b', '#fcd34d']}>
+          <div className="flex items-center gap-2 mb-5">
+            <Megaphone className="w-5 h-5 text-amber-400" />
+            <h3 className="text-base font-semibold text-white">Notice Board</h3>
+          </div>
           {announcements.length === 0 ? (
-            <div className="text-gray-500">No announcements.</div>
+            <div className="text-white/30 text-sm">No announcements.</div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {announcements.map((ann, idx) => (
-                <div key={idx} className="p-3 border border-gray-700/50 rounded-md bg-gray-800/40">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="font-semibold text-white">{ann.title}</h4>
-                    <span className="text-xs text-gray-400">{new Date(ann.createdAt).toLocaleDateString()}</span>
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: 0.4 + idx * 0.06 }}
+                  className="p-4 border border-white/8 rounded-xl bg-white/4"
+                >
+                  <div className="flex justify-between items-start mb-1.5">
+                    <h4 className="font-semibold text-white text-sm">{ann.title}</h4>
+                    <span className="text-xs text-white/30 ml-4 shrink-0">{new Date(ann.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <p className="text-sm text-gray-300">{ann.message}</p>
-                </div>
+                  <p className="text-sm text-white/55">{ann.message}</p>
+                </motion.div>
               ))}
             </div>
           )}
         </Card>
 
-        <Card>
-          <h3 className="text-lg font-semibold mb-4">Current Payroll Estimate</h3>
+        {/* Payroll */}
+        <Card glowColor="160 75 60" colors={['#34d399', '#10b981', '#6ee7b7']}>
+          <div className="flex items-center gap-2 mb-5">
+            <Coins className="w-5 h-5 text-emerald-400" />
+            <h3 className="text-base font-semibold text-white">Current Payroll Estimate</h3>
+          </div>
           {!payslip ? (
-            <div className="text-gray-500">Payroll data not available.</div>
+            <div className="text-white/30 text-sm">Payroll data not available.</div>
           ) : (
-            <div className="space-y-3 pt-2">
-              <div className="flex justify-between border-b border-gray-700 pb-2">
-                <span className="text-gray-400">Base Salary</span>
-                <span className="font-semibold">${payslip.baseSalary}</span>
-              </div>
-              <div className="flex justify-between border-b border-gray-700 pb-2">
-                <span className="text-gray-400">Working Days</span>
-                <span className="font-semibold">{payslip.effectivePresentDays} / {payslip.totalDaysInMonth}</span>
-              </div>
-              <div className="flex justify-between border-b border-gray-700 pb-2">
-                <span className="text-gray-400">Paid Leaves</span>
-                <span className="font-semibold">{payslip.paidLeaveDaysInMonth}</span>
-              </div>
-              <div className="flex justify-between items-center pt-2">
-                <span className="text-lg text-white">Est. Salary</span>
-                <span className="text-2xl font-bold text-green-400">${payslip.finalSalary}</span>
+            <div className="space-y-0">
+              {[
+                { label: 'Base Salary', value: `$${payslip.baseSalary}` },
+                { label: 'Working Days', value: `${payslip.effectivePresentDays} / ${payslip.totalDaysInMonth}` },
+                { label: 'Paid Leaves', value: `${payslip.paidLeaveDaysInMonth}` },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between items-center py-3 border-b border-white/8">
+                  <span className="text-sm text-white/55">{label}</span>
+                  <span className="font-semibold text-white text-sm">{value}</span>
+                </div>
+              ))}
+              <div className="flex justify-between items-center pt-4">
+                <span className="text-white/70 font-medium">Est. Salary</span>
+                <span className="text-2xl font-bold text-emerald-300">${payslip.finalSalary}</span>
               </div>
             </div>
           )}

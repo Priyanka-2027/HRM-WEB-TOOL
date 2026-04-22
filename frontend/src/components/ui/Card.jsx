@@ -1,26 +1,29 @@
-const Card = ({ 
-  children, 
+import BorderGlow from './BorderGlow';
+
+const Card = ({
+  children,
   className = '',
   padding = true,
-  hover = false
+  hover = false,
+  glowColor = '200 75 65',
+  colors = ['#06b6d4', '#818cf8', '#38bdf8'],
+  animated = false,
 }) => {
-  const hoverStyles = hover ? 'hover:border-gray-600 hover:shadow-lg hover:shadow-cyan-500/10 transition-all duration-200' : '';
-  
   return (
-    <div 
-      className={`
-        bg-black/40
-        backdrop-blur-xl
-        border 
-        border-white/5
-        rounded-xl 
-        ${padding ? 'p-6' : ''} 
-        ${hoverStyles}
-        ${className}
-      `}
+    <BorderGlow
+      glowColor={glowColor}
+      colors={colors}
+      backgroundColor="rgba(6, 8, 20, 0.55)"
+      borderRadius={16}
+      glowRadius={38}
+      glowIntensity={0.9}
+      animated={animated}
+      className={className}
     >
-      {children}
-    </div>
+      <div className={padding ? 'p-6' : ''}>
+        {children}
+      </div>
+    </BorderGlow>
   );
 };
 
