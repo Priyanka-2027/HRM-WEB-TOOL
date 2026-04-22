@@ -215,7 +215,7 @@ const AdminDashboardPage = () => {
               return (
                 <div key={label}>
                   <div className="mb-1.5 flex justify-between text-sm">
-                    <span className="capitalize text-white/70">{label.replace(/([A-Z])/g, ' $1')}</span>
+                    <span className="capitalize text-white/70">{label.replace(/([A-Z])/g, ' $1').trim()}</span>
                     <span className={`font-semibold ${style.text}`}>{value}</span>
                   </div>
                   <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">

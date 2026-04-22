@@ -1,9 +1,15 @@
 import { useRef, useCallback, useEffect } from 'react';
 import './BorderGlow.css';
 
+const DEFAULT_HUE = 40;
+const DEFAULT_SATURATION = 80;
+const DEFAULT_LIGHTNESS = 80;
+const SWEEP_START_ANGLE = 110;
+const SWEEP_END_ANGLE = 465; // 355-degree arc, slightly more than a full rotation for visual smoothness
+
 function parseHSL(hslStr) {
   const match = hslStr.match(/([\d.]+)\s*([\d.]+)%?\s*([\d.]+)%?/);
-  if (!match) return { h: 40, s: 80, l: 80 };
+  if (!match) return { h: DEFAULT_HUE, s: DEFAULT_SATURATION, l: DEFAULT_LIGHTNESS };
   return { h: parseFloat(match[1]), s: parseFloat(match[2]), l: parseFloat(match[3]) };
 }
 
@@ -110,17 +116,15 @@ const BorderGlow = ({
   useEffect(() => {
     if (!animated || !cardRef.current) return;
     const card = cardRef.current;
-    const angleStart = 110;
-    const angleEnd = 465;
     card.classList.add('sweep-active');
-    card.style.setProperty('--cursor-angle', `${angleStart}deg`);
+    card.style.setProperty('--cursor-angle', `${SWEEP_START_ANGLE}deg`);
 
     animateValue({ duration: 500, onUpdate: v => card.style.setProperty('--edge-proximity', v) });
     animateValue({ ease: easeInCubic, duration: 1500, end: 50, onUpdate: v => {
-      card.style.setProperty('--cursor-angle', `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`);
+      card.style.setProperty('--cursor-angle', `${(SWEEP_END_ANGLE - SWEEP_START_ANGLE) * (v / 100) + SWEEP_START_ANGLE}deg`);
     }});
     animateValue({ ease: easeOutCubic, delay: 1500, duration: 2250, start: 50, end: 100, onUpdate: v => {
-      card.style.setProperty('--cursor-angle', `${(angleEnd - angleStart) * (v / 100) + angleStart}deg`);
+      card.style.setProperty('--cursor-angle', `${(SWEEP_END_ANGLE - SWEEP_START_ANGLE) * (v / 100) + SWEEP_START_ANGLE}deg`);
     }});
     animateValue({ ease: easeInCubic, delay: 2500, duration: 1500, start: 100, end: 0,
       onUpdate: v => card.style.setProperty('--edge-proximity', v),
