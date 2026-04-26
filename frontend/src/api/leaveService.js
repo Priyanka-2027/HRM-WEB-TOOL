@@ -27,4 +27,9 @@ export const leaveService = {
     const response = await axios.delete(`${API_URL}/${id}`);
     return response.data;
   },
+
+  getTeamLeaves: async (params = {}) => {
+    const response = await axios.get(`${API_URL}/team`, { params });
+    return response.data;
+  },
 };

@@ -8,6 +8,7 @@ import {
   deleteEmployee,
   getEmployeeByUserId,
   getEmployeeStats,
+  getMyTeam,
 } from '../controllers/employee.controller.js';
 import {
   markAttendance,
@@ -18,6 +19,7 @@ import {
   getEmployeeAttendanceSummary,
   getOrganizationAttendanceSummary,
   getTodayAttendance,
+  getTeamAttendance,
 } from '../controllers/attendance.controller.js';
 import {
   requestLeave,
@@ -25,6 +27,7 @@ import {
   getLeaveById,
   reviewLeave,
   deleteLeave,
+  getTeamLeaves,
 } from '../controllers/leave.controller.js';
 import {
   createSkill,
@@ -48,6 +51,13 @@ import {
   deleteAnnouncement,
 } from '../controllers/announcement.controller.js';
 import { getMyPayslip } from '../controllers/payroll.controller.js';
+import {
+  createTask,
+  getManagerTasks,
+  getEmployeeTasks,
+  updateTaskStatus,
+  deleteTask,
+} from '../controllers/task.controller.js';
 import { protect, authorize } from '../middlewares/auth.middleware.js';
 
 const router = Router();
@@ -69,6 +79,7 @@ router.post('/auth/logout', protect, logout);
 
 // ─── Employee routes ──────────────────────────────────────────────────────────
 // IMPORTANT: static sub-paths MUST come before /:id to avoid route shadowing
+router.get('/employees/my-team',      protect, authorize('manager'), getMyTeam);
 router.get('/employees/stats',        protect, authorize('admin'), getEmployeeStats);
 router.get('/employees/user/:userId', protect, getEmployeeByUserId);
 router.post('/employees',             protect, authorize('admin'), createEmployee);
@@ -79,6 +90,7 @@ router.delete('/employees/:id',       protect, authorize('admin'), deleteEmploye
 
 // ─── Attendance routes ────────────────────────────────────────────────────────
 // Static sub-paths before /:id
+router.get('/attendance/team',                    protect, authorize('manager'), getTeamAttendance);
 router.get('/attendance/today',                   protect, authorize('admin'), getTodayAttendance);
 router.get('/attendance/summary/employee',        protect, getEmployeeAttendanceSummary);
 router.get('/attendance/summary/organization',    protect, authorize('admin'), getOrganizationAttendanceSummary);
@@ -89,11 +101,19 @@ router.put('/attendance/:id',                     protect, authorize('admin'), u
 router.delete('/attendance/:id',                  protect, authorize('admin'), deleteAttendance);
 
 // ─── Leave routes ─────────────────────────────────────────────────────────────
+router.get('/leaves/team',          protect, authorize('manager'), getTeamLeaves);
 router.post('/leaves',              protect, requestLeave);
 router.get('/leaves',               protect, getLeaves);
 router.get('/leaves/:id',           protect, getLeaveById);
 router.patch('/leaves/:id/status',  protect, authorize('admin'), reviewLeave);
 router.delete('/leaves/:id',        protect, deleteLeave);
+
+// ─── Task routes ──────────────────────────────────────────────────────────────
+router.post('/tasks',               protect, authorize('manager'), createTask);
+router.get('/tasks/manager',        protect, authorize('manager'), getManagerTasks);
+router.get('/tasks/employee',       protect, getEmployeeTasks);
+router.patch('/tasks/:id/status',   protect, updateTaskStatus);
+router.delete('/tasks/:id',         protect, authorize('manager'), deleteTask);
 
 // ─── Skill routes ─────────────────────────────────────────────────────────────
 // Static sub-paths before /:id

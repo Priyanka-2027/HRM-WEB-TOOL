@@ -13,7 +13,7 @@ const Card = ({
     <BorderGlow
       glowColor={glowColor}
       colors={colors}
-      backgroundColor="rgba(6, 8, 20, 0.55)"
+      backgroundColor="var(--bg-card)"
       borderRadius={16}
       glowRadius={38}
       glowIntensity={0.9}

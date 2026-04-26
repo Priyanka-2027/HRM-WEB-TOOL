@@ -340,3 +340,43 @@ export const getTodayAttendance = async (req, res, next) => {
     next(error);
   }
 };
+
+// Get team attendance
+export const getTeamAttendance = async (req, res, next) => {
+  try {
+    const { startDate, endDate, status } = req.query;
+
+    const manager = await Employee.findOne({ userId: req.user.id });
+    if (!manager) {
+      return sendError(res, 404, 'Manager employee record not found');
+    }
+
+    const teamMembers = await Employee.find({ reportingTo: manager._id }).select('_id');
+    const teamIds = teamMembers.map(emp => emp._id);
+
+    const filter = { employeeId: { $in: teamIds } };
+    if (status) filter.status = status;
+    
+    if (startDate || endDate) {
+      filter.date = {};
+      if (startDate) filter.date.$gte = new Date(startDate);
+      if (endDate) {
+        const endDateObj = new Date(endDate);
+        endDateObj.setHours(23, 59, 59, 999);
+        filter.date.$lte = endDateObj;
+      }
+    }
+
+    const attendance = await Attendance.find(filter)
+      .populate('employeeId', 'email designation department')
+      .populate('userId', 'firstName lastName email')
+      .sort({ date: -1 });
+
+    return sendResponse(res, 200, {
+      success: true,
+      data: attendance,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

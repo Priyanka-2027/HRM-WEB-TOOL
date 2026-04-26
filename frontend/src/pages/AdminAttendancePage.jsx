@@ -6,6 +6,7 @@ import BorderGlow from '../components/ui/BorderGlow';
 import GlassSelect from '../components/ui/GlassSelect';
 import { attendanceService } from '../api/attendanceService';
 import { employeeService } from '../api/employeeService';
+import { useTheme } from '../contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ClipboardCheck, List, AlertCircle, CheckCircle, Clock,
@@ -22,7 +23,7 @@ const EMPLOYEE_STATUS_OPTS = [
 const FILTER_STATUS_OPTS = [{ value: '', label: 'All Status' }, ...EMPLOYEE_STATUS_OPTS];
 
 const STATUS_MAP = {
-  present:  { color: '#22d3ee', bg: 'bg-cyan-500/10',    border: 'border-cyan-500/20',    text: 'text-cyan-400'    },
+  present:  { color: '#7c3aed', bg: 'bg-purple-500/10',    border: 'border-purple-500/20',    text: 'text-purple-400'    },
   absent:   { color: '#ef4444', bg: 'bg-red-500/10',     border: 'border-red-500/20',     text: 'text-red-400'     },
   late:     { color: '#f59e0b', bg: 'bg-amber-500/10',   border: 'border-amber-500/20',   text: 'text-amber-400'   },
   'half-day': { color: '#fb923c', bg: 'bg-orange-500/10', border: 'border-orange-500/20', text: 'text-orange-400'  },
@@ -38,8 +39,8 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const glassSelect = "w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-white focus:border-cyan-500/50 outline-none transition-all appearance-none cursor-pointer";
-const glassInput  = "w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-cyan-500/50 outline-none transition-all";
+const glassSelect = "w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-white focus:border-purple-500/40 outline-none transition-all appearance-none cursor-pointer";
+const glassInput  = "w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-purple-500/40 outline-none transition-all";
 
 const AdminAttendancePage = () => {
   const [searchParams] = useSearchParams();
@@ -64,6 +65,8 @@ const AdminAttendancePage = () => {
     employeeId: initialEmpId,
     page: 1 
   });
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   useEffect(() => { 
     fetchEmployees(); 
@@ -121,7 +124,9 @@ const AdminAttendancePage = () => {
         {[{ id: 'mark', label: 'Mark Attendance', Icon: ClipboardCheck }, { id: 'view', label: 'View Records', Icon: List }].map(({ id, label, Icon }) => (
           <button key={id} onClick={() => setActiveTab(id)}
             className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-              activeTab === id ? 'bg-white text-black shadow-lg shadow-white/10' : 'bg-white/5 border border-white/5 text-slate-400 hover:bg-white/10'
+              activeTab === id 
+                ? (isLight ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-black shadow-lg shadow-white/10')
+                : (isLight ? 'bg-slate-50 border border-slate-200 text-slate-500 hover:bg-slate-100' : 'bg-white/5 border border-white/5 text-slate-400 hover:bg-white/10')
             }`}>
             <Icon className="w-3.5 h-3.5" />{label}
           </button>
@@ -150,11 +155,11 @@ const AdminAttendancePage = () => {
           <BorderGlow borderRadius={28}>
             <div className="p-8">
               <div className="flex items-center gap-3 mb-8">
-                <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/20">
-                  <ClipboardCheck className="w-5 h-5 text-cyan-400" />
+                <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                  <ClipboardCheck className="w-5 h-5 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Mark Attendance</h3>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Mark Attendance</h3>
                   <p className="text-[10px] text-slate-500 mt-0.5">Record today's attendance for an employee</p>
                 </div>
               </div>
@@ -204,9 +209,9 @@ const AdminAttendancePage = () => {
                   </div>
                 </div>
 
-                <motion.button type="submit" disabled={loading}
+                 <motion.button type="submit" disabled={loading}
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-cyan-500/20 disabled:opacity-50 disabled:cursor-not-allowed">
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-black uppercase tracking-widest transition-all shadow-lg shadow-purple-600/20 disabled:opacity-50 disabled:cursor-not-allowed">
                   <ClipboardCheck className="w-4 h-4" />
                   {loading ? 'Marking…' : 'Mark Attendance'}
                 </motion.button>
@@ -258,7 +263,7 @@ const AdminAttendancePage = () => {
             <div className="p-6">
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
-                  <div className="w-8 h-8 border-2 border-white/20 border-t-cyan-400 rounded-full animate-spin" />
+                  <div className="w-8 h-8 border-2 border-white/20 border-t-purple-400 rounded-full animate-spin" />
                   <p className="text-slate-500 text-sm">Loading records…</p>
                 </div>
               ) : attendance.length === 0 ? (
@@ -269,9 +274,9 @@ const AdminAttendancePage = () => {
               ) : (
                 <div className="space-y-3">
                   {/* Header */}
-                  <div className="grid grid-cols-12 gap-4 px-4 pb-3 border-b border-white/5">
+                  <div className="grid grid-cols-12 gap-4 px-4 pb-3 border-b border-slate-200 dark:border-white/5">
                     {['Employee', 'Date', 'Status', 'Check In', 'Check Out'].map((h, i) => (
-                      <div key={h} className={`${i === 0 ? 'col-span-4' : 'col-span-2'} text-[10px] font-black uppercase tracking-widest text-slate-600`}>{h}</div>
+                      <div key={h} className={`${i === 0 ? 'col-span-4' : 'col-span-2'} text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-600`}>{h}</div>
                     ))}
                   </div>
                   <AnimatePresence mode="popLayout">
@@ -281,13 +286,17 @@ const AdminAttendancePage = () => {
                       return (
                         <motion.div key={rec._id} layout
                           initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.03 }}
-                          className="grid grid-cols-12 gap-4 items-center px-4 py-3.5 rounded-2xl hover:bg-white/[0.04] transition-all border border-transparent hover:border-white/5">
+                          className={`grid grid-cols-12 gap-4 items-center px-4 py-3.5 rounded-2xl transition-all border border-transparent ${
+                            isLight
+                              ? 'hover:bg-slate-50 hover:border-slate-200'
+                              : 'hover:bg-white/[0.04] hover:border-white/5'
+                          }`}>
                           <div className="col-span-4 flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full shrink-0 flex items-center justify-center text-[11px] font-black"
                               style={{ background: `${color}18`, color, border: `1px solid ${color}30` }}>
                               {empName[0] || '?'}
                             </div>
-                            <span className="text-xs font-semibold text-white truncate">{empName}</span>
+                            <span className="text-xs font-semibold text-slate-900 dark:text-white truncate">{empName}</span>
                           </div>
                           <div className="col-span-2 text-xs text-slate-400">{new Date(rec.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })}</div>
                           <div className="col-span-2"><StatusBadge status={rec.status} /></div>

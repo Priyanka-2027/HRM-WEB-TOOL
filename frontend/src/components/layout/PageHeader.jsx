@@ -10,8 +10,8 @@ const PageHeader = ({
     <div className={`mb-6 ${className}`}>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-white">{title}</h1>
-          {subtitle && <p className="mt-1 text-gray-400">{subtitle}</p>}
+          <h1 className="text-4xl md:text-[2.5rem] font-black tracking-tight text-slate-900 dark:text-white mb-1">{title}</h1>
+          {subtitle && <p className="text-sm font-medium text-slate-500">{subtitle}</p>}
         </div>
         {actions.length > 0 && (
           <div className="mt-4 sm:mt-0 flex flex-wrap gap-2">

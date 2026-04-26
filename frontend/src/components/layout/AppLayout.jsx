@@ -1,45 +1,35 @@
 import Prism from '../background/Prism';
 
-const AppLayout = ({ children }) => {
+const AppLayout = ({ children, showPrism = false }) => {
   return (
-    <div style={{ width: '100%', minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div className="w-full min-h-screen relative overflow-hidden bg-slate-50 dark:bg-[#050507] transition-colors duration-500">
       {/* Dynamic Background Layer */}
-      <div style={{
-        position: 'fixed',
-        inset: 0,
-        zIndex: 0,
-        pointerEvents: 'none'
-      }}>
-        <Prism
-          animationType="rotate"
-          timeScale={0.15}
-          scale={4.0}
-          height={3.0}
-          baseWidth={6.0}
-          glow={0.6}
-          noise={0.02}
-          colorFrequency={1.2}
-          suspendWhenOffscreen={true}
-          opacity={0.3}
-        />
-      </div>
+      {showPrism && (
+        <div className="fixed inset-0 z-0 pointer-events-none transition-opacity duration-700 dark:opacity-20 opacity-10">
+          <Prism
+            animationType="rotate"
+            timeScale={0.08}
+            scale={4.0}
+            height={3.0}
+            baseWidth={6.0}
+            glow={0.5}
+            noise={0.02}
+            colorFrequency={1.0}
+            suspendWhenOffscreen={true}
+            opacity={0.2}
+          />
+        </div>
+      )}
 
-      {/* Dark Silk Overlay */}
-      <div style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'radial-gradient(circle at 50% -20%, rgba(13, 17, 30, 0.4) 0%, #06080f 85%)',
-        zIndex: 1,
-        pointerEvents: 'none'
-      }} />
+
+      {/* Deep Silk Overlay - Adapted for theme */}
+      <div className="fixed inset-0 z-1 pointer-events-none bg-[radial-gradient(circle_at_50%_-20%,rgba(124,58,237,0.05)_0%,rgba(248,250,252,0)_80%)] dark:bg-[radial-gradient(circle_at_50%_-20%,rgba(124,58,237,0.1)_0%,#050507_80%)]" />
 
       {/* Noise Texture for Premium Feel */}
-      <div style={{
+      <div className="noise-overlay" style={{
         position: 'fixed',
         inset: 0,
-        backgroundImage: 'url("/noise.svg")',
-        opacity: 0.05,
-        mixBlendMode: 'overlay',
+        opacity: 0.03,
         zIndex: 2,
         pointerEvents: 'none'
       }} />
@@ -58,3 +48,4 @@ const AppLayout = ({ children }) => {
 };
 
 export default AppLayout;
+

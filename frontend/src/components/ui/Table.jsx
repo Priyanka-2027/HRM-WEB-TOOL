@@ -24,24 +24,24 @@ const Table = ({
     <Card padding={false} className={className}>
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-900/50 border-b border-gray-700">
+          <thead className="bg-slate-50 dark:bg-gray-900/50 border-b border-slate-200 dark:border-gray-700">
             <tr>
               {columns.map((col, idx) => (
                 <th
                   key={idx}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                  className="px-6 py-3 text-left text-xs font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest"
                 >
                   {getHeader(col)}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-700/50">
+          <tbody className="divide-y divide-slate-100 dark:divide-gray-700/50">
             {data.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="px-6 py-8 text-center text-gray-500"
+                  className="px-6 py-8 text-center text-slate-500"
                 >
                   No data available
                 </td>
@@ -51,10 +51,10 @@ const Table = ({
                 <tr
                   key={rowIdx}
                   onClick={() => onRowClick && onRowClick(row)}
-                  className={onRowClick ? 'hover:bg-gray-700/30 cursor-pointer transition-colors' : ''}
+                  className={onRowClick ? 'hover:bg-slate-100/50 dark:hover:bg-gray-700/30 cursor-pointer transition-colors px-6' : ''}
                 >
                   {columns.map((col, colIdx) => (
-                    <td key={colIdx} className="px-6 py-4 text-sm text-gray-300">
+                    <td key={colIdx} className="px-6 py-4 text-sm text-slate-700 dark:text-gray-300 font-medium">
                       {getValue(row, col)}
                     </td>
                   ))}

@@ -48,8 +48,8 @@ const LoginPage = () => {
   };
 
   return (
-    <AppLayout>
-      <div className="flex min-h-screen bg-[#0a0a0c]">
+    <AppLayout showPrism={true}>
+      <div className="flex min-h-screen bg-slate-50 dark:bg-[#050507]">
         {/* Left Side: Informatics (Hidden on mobile) */}
         <div className="hidden lg:block lg:w-1/2 h-screen sticky top-0">
           <AuthInformatics />
@@ -64,8 +64,8 @@ const LoginPage = () => {
               transition={{ duration: 0.5 }}
             >
               <div className="mb-10 lg:hidden text-center">
-                <img src="/hironix.png" alt="Hironix Logo" className="w-12 h-12 mx-auto mb-4" />
-                <h1 className="text-3xl font-black text-white tracking-tighter">HIRONIX</h1>
+                <img src="/hironix.png" alt="Hironix Logo" className="w-[50px] h-[50px] mx-auto mb-2 dark:invert" />
+                <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter">HIRONIX</h1>
               </div>
 
               <div className="mb-10">
@@ -73,8 +73,8 @@ const LoginPage = () => {
                   <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                   <span className="text-xs font-bold uppercase tracking-widest text-[10px]">Back to Home</span>
                 </Link>
-                <h2 className="text-4xl font-black text-white tracking-tight mb-2">Welcome Back</h2>
-                <p className="text-slate-400 text-sm font-medium">Please enter your credentials to access the portal.</p>
+                <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-2">Welcome Back</h2>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Please enter your credentials to access the portal.</p>
               </div>
 
               <BorderGlow borderRadius={32}>
@@ -94,14 +94,14 @@ const LoginPage = () => {
                     <div className="space-y-2">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-slate-500 ml-1">Work Email</label>
                       <div className="relative group">
-                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-purple-500 transition-colors" />
                         <input
                           type="email"
                           name="email"
                           value={formData.email}
                           onChange={handleChange}
                           placeholder="name@company.com"
-                          className={`w-full bg-white/5 border ${errors.email ? 'border-red-500/50' : 'border-white/10'} rounded-2xl pl-12 pr-4 py-3.5 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-all`}
+                          className={`w-full bg-slate-100 dark:bg-white/5 border ${errors.email ? 'border-red-500/50' : 'border-slate-200 dark:border-white/10'} rounded-2xl pl-12 pr-4 py-3.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-purple-500/40 transition-all`}
                           disabled={loading}
                           required
                         />
@@ -112,14 +112,14 @@ const LoginPage = () => {
                     <div className="space-y-2">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-slate-500 ml-1">Secure Password</label>
                       <div className="relative group">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-purple-500 transition-colors" />
                         <input
                           type="password"
                           name="password"
                           value={formData.password}
                           onChange={handleChange}
                           placeholder="••••••••"
-                          className={`w-full bg-white/5 border ${errors.password ? 'border-red-500/50' : 'border-white/10'} rounded-2xl pl-12 pr-4 py-3.5 text-sm text-white focus:outline-none focus:border-cyan-500/50 transition-all`}
+                          className={`w-full bg-slate-100 dark:bg-white/5 border ${errors.password ? 'border-red-500/50' : 'border-slate-200 dark:border-white/10'} rounded-2xl pl-12 pr-4 py-3.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-purple-500/40 transition-all`}
                           disabled={loading}
                           required
                         />
@@ -130,7 +130,7 @@ const LoginPage = () => {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-4 rounded-2xl bg-white text-black font-black text-xs uppercase tracking-widest hover:bg-cyan-400 hover:text-black transition-all shadow-xl shadow-white/5 disabled:opacity-50 mt-4 active:scale-[0.98] flex items-center justify-center gap-2 group"
+                      className="w-full py-4 rounded-2xl bg-purple-600 text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-purple-500 transition-all shadow-[0_4px_30px_rgba(124,58,237,0.4)] disabled:opacity-50 mt-4 active:scale-[0.98] flex items-center justify-center gap-2 group border border-purple-400/20"
                     >
                       {loading ? 'Authenticating...' : (
                         <>
@@ -145,7 +145,7 @@ const LoginPage = () => {
                     <p className="text-xs text-slate-500 font-medium mb-4">New to Hironix?</p>
                     <Link
                       to="/register"
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/5 border border-white/5 text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 transition-all"
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-all"
                     >
                       Create Account
                     </Link>

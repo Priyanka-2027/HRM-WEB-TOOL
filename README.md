@@ -1,89 +1,90 @@
-# 🌌 Hironix: The Glassmorphic HRM Engine
+# <p align="center">🌌 Hironix: The Glassmorphic HRM Engine</p>
 
-> **Educational Repository**: A deep-dive into full-stack architecture, real-time data synchronization, and premium aesthetic engineering.
+<p align="center">
+  <img src="Hironix.png" alt="Hironix Banner" width="200" />
+</p>
 
-Hironix is not just a human resource management tool; it is a curriculum in modern web development. Built to demonstrate the synergy between **MERN Stack** power and **Glassmorphic** design excellence, this project serves as a blueprint for high-performance enterprise applications.
-
----
-
-## 🏛️ Architectural Blueprint
-
-### 1. The Glassmorphic UI System
-Hironix leverages a custom-built design system to achieve an "os-native" feel within the browser.
-- **Backdrop-Blur Overlays**: Utilizing `backdrop-filter: blur()` for depth.
-- **Dynamic Glow Borders**: Custom components that calculate lighting based on parent state.
-- **Prism Background**: A WebGL-powered animated background using `OGL` to minimize CPU overhead while maximizing aesthetic impact.
-
-### 2. Intelligent Data Linking (Onboarding Engine)
-A core educational takeaway is the **Automatic Account Linkage**.
-- **The Problem**: Traditionally, User accounts and Employee profiles are disconnected.
-- **The Hironix Solution**: A backend trigger in `auth.controller.js` that atomically creates a "Pending Onboarding" employee profile upon user registration. This ensures immediate data consistency across the entire ecosystem.
-
-### 3. Contextual Awareness (Role-Based Logic)
-- **Role-Gated Routing**: Strict RBAC (Role-Based Access Control) using React Router and protected backend middlewares.
-- **Adaptive UI**: The shared `AppTopNav` component dynamically reconfigures its search capabilities and **Notification Sets** based on the authenticated user's role.
+<p align="center">
+  <strong>The Future of Workforce Orchestration.</strong><br>
+  Built on the MERN stack with a focus on <em>Industrial-Grade Visual Engineering</em> and <em>Dual-Theme Accessibility</em>.
+</p>
 
 ---
 
-## 🧪 Educational Modules
+## 💎 Project Overview
 
-### 📡 Real-Time State & Memoization
-Observe `EmployeeDashboardPage.jsx` to see how multiple async data streams (Announcements, Summary, Payroll) are managed with `useEffect` and optimized using `useMemo` for heavy chart computations.
+Hironix is a state-of-the-art Human Resource Management (HRM) platform designed to bridge the gap between enterprise-level functionality and premium consumer-grade aesthetics. Featuring a revolutionary **Dual-Theme Glassmorphic interface**, Hironix provides a seamless experience for Employees, Managers, and Administrators alike.
 
-### 💰 Payroll Logic (Pro-Rata Computation)
-The payroll module demonstrates how to calculate earnings based on dynamic inputs:
-```js
-Earnings = (Base_Salary / Days_In_Month) * (Effective_Present_Days + Paid_Leaves)
-```
-Located in `backend/src/controllers/payroll.controller.js`, this module teaches business logic implementation in a RESTful environment.
+### 🌟 Key Highlights
+- **Premium v3.0 Architecture**: Stabilized production-ready codebase with optimized state management.
+- **Visual Excellence**: Industry-leading glassmorphism with dynamic backdrop blurring and real-time glow effects.
+- **Intelligent Onboarding**: A differentiated registration system that identifies user intent (Talent vs. Manager) at the point of origin.
 
 ---
 
-## 🚀 Deployment Handbook
+## 🏛️ System Architecture
 
-Hironix is pre-configured for modern cloud deployment.
+### 🌓 Dual-Theme Revolution
+Hironix transitions beyond "Dark Mode" to offer a fully responsive dual-theme design system.
+*   **Adaptive Glassmorphism**: High-blur transparency in Dark Mode; clean, high-readiness surfaces in Light Mode.
+*   **Centralized Token System**: A unified design system managed via `ThemeContext` and optimized CSS variables for instant theme toggling.
+*   **Intelligent Contrast**: High-precision contrast ratios tailored for professional administrative environments.
 
-### 🌐 Frontend (Netlify Ready)
-The [frontend/netlify.toml](frontend/netlify.toml) handles:
-- Optimized production builds.
-- SPA (Single Page Application) routing to prevent 404s on deep-links.
+### 🔑 Advanced Authentication & RBAC
+*   **Universal Login Flow**: A role-agnostic entry point that intelligently routes users to their respective dashboards based on validated database roles.
+*   **Role-Specific Onboarding**: Distinct registration portals for **Talent** and **Managers**, ensuring every account is provisioned with the correct permissions from day one.
+*   **Automated Profile Splicing**: Atomic synchronization between auth credentials and employee data structures to prevent data fragmentation.
 
-### ⚙️ Backend (Vercel Ready)
-The [backend/vercel.json](backend/vercel.json) handles:
-- Serverless Node.js execution.
-- API route aliasing.
+### 📊 Dashboard Modules
+*   **Employee Portal**: Personal KPI tracking, automated payroll visibility, skill matrices, and notification centers.
+*   **Manager Hub**: Team performance analytics, resource allocation tools, and streamlined approval engines.
+*   **Admin Control**: Global system configuration, broadcast announcement management, and total workforce oversight.
 
 ---
 
-## 🛠️ Local Assembly Guide
+## 🛠️ Technology Stack
 
-### 1. Core Installation
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend** | React 18, Tailwind CSS, Framer Motion, Axios, Lucide Icons |
+| **Backend** | Node.js, Express, MongoDB Atlas, Mongoose |
+| **Animation** | OGL (WebGL) for Prism backgrounds, CSS3 Glassmorphism |
+| **Deployment** | Vercel (Backend), Netlify (Frontend) |
+
+---
+
+## 🚀 Getting Started
+
+### 1. Prerequisites
+- Node.js (v16.x or higher)
+- MongoDB Cluster
+- Git
+
+### 2. Installation
 ```bash
-# Clone the heart of the engine
+# Clone the repository
 git clone https://github.com/YourRepo/Hironix.git
 
-# Initialize the UI
+# Setup Frontend
 cd frontend && npm install
 
-# Initialize the Intelligence
+# Setup Backend
 cd ../backend && npm install
 ```
 
-### 2. Synchronization (Environment)
-Configure your `.env` files in both directories following the provided examples. Ensure your `MONGO_URI` is active.
-
-### 3. Ignition
+### 3. Execution
+Create environment files in both `frontend/` and `backend/` directories, then launch:
 ```bash
-# Start Backend (Terminal A)
+# Terminal A (Backend)
 npm run dev
 
-# Start Frontend (Terminal B)
+# Terminal B (Frontend)
 npm run dev
 ```
 
 ---
 
-## 📄 Final Credits
-Created with ❤️ for the purpose of architectural exploration and engineering education.
-
-_Engine Version: 2.0 (Stabilized & Polished)_
+<p align="center">
+  <em>Hironix v3.0 — Precision Engineering for the Modern Workforce.</em><br>
+  Built with ❤️ for High-Fidelity Product Exploration.
+</p>

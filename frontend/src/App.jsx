@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { ProtectedRoute, PublicRoute } from './components/auth/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
@@ -15,12 +16,17 @@ import AdminLeavePage from './pages/AdminLeavePage';
 import EmployeeLeavePage from './pages/EmployeeLeavePage';
 import AdminSkillsPage from './pages/AdminSkillsPage';
 import EmployeeSkillsPage from './pages/EmployeeSkillsPage';
+import ManagerDashboardPage from './pages/ManagerDashboardPage';
+import ManagerTasksPage from './pages/ManagerTasksPage';
+import ManagerTeamPage from './pages/ManagerTeamPage';
+import EmployeeTasksPage from './pages/EmployeeTasksPage';
 
 const App = () => {
   return (
     <Router>
-      <AuthProvider>
-        <Routes>
+      <ThemeProvider>
+        <AuthProvider>
+          <Routes>
           <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
           <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
@@ -98,6 +104,32 @@ const App = () => {
             }
           />
 
+          {/* Manager Routes */}
+          <Route
+            path="/manager/dashboard"
+            element={
+              <ProtectedRoute requiredRole="manager">
+                <ManagerDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manager/tasks"
+            element={
+              <ProtectedRoute requiredRole="manager">
+                <ManagerTasksPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/manager/team"
+            element={
+              <ProtectedRoute requiredRole="manager">
+                <ManagerTeamPage />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Employee Routes */}
           <Route
             path="/employee/dashboard"
@@ -134,11 +166,22 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          
+          <Route
+            path="/employee/tasks"
+            element={
+              <ProtectedRoute requiredRole="employee">
+                <EmployeeTasksPage />
+              </ProtectedRoute>
+            }
+          />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
-    </Router>
+    </ThemeProvider>
+  </Router>
+
   );
 };
 

@@ -44,4 +44,10 @@ export const employeeService = {
     const response = await axios.get(`${API_URL}/stats`);
     return response.data;
   },
+
+  // Get manager's team
+  getMyTeam: async () => {
+    const response = await axios.get(`${API_URL}/my-team`);
+    return response.data;
+  },
 };

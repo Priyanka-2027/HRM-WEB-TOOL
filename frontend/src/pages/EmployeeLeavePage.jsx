@@ -7,6 +7,7 @@ import GlassSelect from '../components/ui/GlassSelect';
 import { leaveService } from '../api/leaveService';
 import { employeeService } from '../api/employeeService';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CalendarOff, Clock, CheckCircle2, XCircle, AlertCircle, Send, Trash2 } from 'lucide-react';
 
@@ -25,24 +26,36 @@ const LEAVE_TYPES = [
   { value: 'other',   label: 'Other'   },
 ];
 
+const ACCENT_DARK = {
+  amber:   'from-amber-500/10 to-amber-500/0 border-amber-500/20 text-amber-400',
+  emerald: 'from-emerald-500/10 to-emerald-500/0 border-emerald-500/20 text-emerald-400',
+  white:   'from-white/5 to-white/0 border-white/10 text-white',
+};
+const ACCENT_LIGHT = {
+  amber:   'bg-white border-amber-200 text-amber-600',
+  emerald: 'bg-white border-emerald-200 text-emerald-700',
+  white:   'bg-white border-slate-200 text-slate-900',
+};
+
 const StatCard = ({ Icon, label, value, accent }) => {
-  const clrs = {
-    amber:  'from-amber-500/10 to-amber-500/0 border-amber-500/20 text-amber-400',
-    emerald:'from-emerald-500/10 to-emerald-500/0 border-emerald-500/20 text-emerald-400',
-    white:  'from-white/5 to-white/0 border-white/10 text-white',
-  }[accent] || 'from-white/5 to-white/0 border-white/10 text-white';
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+  const clrs = isLight
+    ? ACCENT_LIGHT[accent] || ACCENT_LIGHT.white
+    : (ACCENT_DARK[accent] || ACCENT_DARK.white);
 
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-      className={`rounded-2xl border bg-gradient-to-b p-5 ${clrs}`}>
+      className={`rounded-2xl border p-5 shadow-sm ${isLight ? clrs : `bg-gradient-to-b ${clrs}`}`}>
       <div className="flex items-center gap-2 mb-3">
-        <Icon className="w-4 h-4 opacity-60" />
+        {Icon && <Icon className="w-4 h-4 opacity-60" />}
         <p className="text-[10px] font-black uppercase tracking-widest opacity-60">{label}</p>
       </div>
       <p className="text-3xl font-black">{value}</p>
     </motion.div>
   );
 };
+
 
 const EmployeeLeavePage = () => {
   const { user } = useAuth();
@@ -162,7 +175,7 @@ const EmployeeLeavePage = () => {
               <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
                 <CalendarOff className="w-4 h-4 text-cyan-400" />
               </div>
-              <h3 className="text-sm font-black text-white uppercase tracking-widest">Request Leave</h3>
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Request Leave</h3>
             </div>
             <form onSubmit={submitLeave} className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <GlassSelect label="Leave Type" value={form.leaveType}
@@ -176,7 +189,7 @@ const EmployeeLeavePage = () => {
                 <textarea value={form.reason}
                   onChange={e => setForm(p => ({ ...p, reason: e.target.value }))}
                   rows={3} required placeholder="Brief reason for leave…"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/8 rounded-xl text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 resize-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 resize-none transition-all"
                 />
               </div>
               <div className="md:col-span-2">
@@ -194,7 +207,7 @@ const EmployeeLeavePage = () => {
         <BorderGlow borderRadius={28}>
           <div className="p-6">
             <div className="flex items-center gap-3 mb-5">
-              <h3 className="text-sm font-black text-white">Leave History</h3>
+              <h3 className="text-sm font-black text-slate-900 dark:text-white">Leave History</h3>
               <span className="ml-auto text-[10px] text-slate-600 font-bold">{total} total</span>
             </div>
             {loading ? (
@@ -209,9 +222,9 @@ const EmployeeLeavePage = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                <div className="grid grid-cols-12 gap-4 px-4 pb-3 border-b border-white/5">
+                <div className="grid grid-cols-12 gap-4 px-4 pb-3 border-b border-slate-200 dark:border-white/5">
                   {['Type', 'Period', 'Days', 'Status', 'Action'].map((h, i) => (
-                    <div key={h} className={`${i === 1 ? 'col-span-3' : i === 0 ? 'col-span-2' : i === 4 ? 'col-span-2' : 'col-span-2'} text-[10px] font-black uppercase tracking-widest text-slate-600`}>{h}</div>
+                    <div key={h} className={`${i === 1 ? 'col-span-3' : i === 0 ? 'col-span-2' : i === 4 ? 'col-span-2' : 'col-span-2'} text-[10px] font-black uppercase tracking-widest text-slate-500`}>{h}</div>
                   ))}
                 </div>
                 <AnimatePresence mode="popLayout">
@@ -220,14 +233,14 @@ const EmployeeLeavePage = () => {
                     return (
                       <motion.div key={leave._id} layout
                         initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.04 }}
-                        className="grid grid-cols-12 gap-4 items-center px-4 py-3.5 rounded-2xl hover:bg-white/[0.04] transition-all border border-transparent hover:border-white/5">
-                        <div className="col-span-2 text-xs text-white font-bold capitalize">{leave.leaveType}</div>
-                        <div className="col-span-3 text-xs text-slate-400">
+                        className="grid grid-cols-12 gap-4 items-center px-4 py-3.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/[0.04] transition-all border border-transparent hover:border-slate-200 dark:hover:border-white/5">
+                        <div className="col-span-2 text-xs text-slate-900 dark:text-white font-bold capitalize">{leave.leaveType}</div>
+                        <div className="col-span-3 text-xs text-slate-500">
                           {new Date(leave.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           {' — '}
                           {new Date(leave.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                         </div>
-                        <div className="col-span-2 text-xs text-slate-300 font-bold">{leave.daysCount || '—'} d</div>
+                        <div className="col-span-2 text-xs text-slate-600 dark:text-slate-300 font-bold">{leave.daysCount || '—'} d</div>
                         <div className="col-span-3">
                           <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black border ${cfg.bg} ${cfg.border} ${cfg.text}`}>
                             {leave.status}

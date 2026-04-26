@@ -6,6 +6,7 @@ import BorderGlow from '../components/ui/BorderGlow';
 import GlassSelect from '../components/ui/GlassSelect';
 import { employeeService } from '../api/employeeService';
 import { skillService } from '../api/skillService';
+import { useTheme } from '../contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plus, Zap, BookOpen, Star, AlertCircle, CheckCircle,
@@ -15,8 +16,8 @@ import {
 const PROFICIENCY_LABELS = ['', 'Beginner', 'Basic', 'Intermediate', 'Advanced', 'Expert'];
 const PROFICIENCY_COLORS = ['', '#6b7280', '#3b82f6', '#22d3ee', '#a78bfa', '#fbbf24'];
 
-const glassSelect = "w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-white focus:border-cyan-500/50 outline-none transition-all appearance-none cursor-pointer";
-const glassInput  = "w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-cyan-500/50 outline-none transition-all";
+const glassSelect = "w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-purple-500/50 outline-none transition-all appearance-none cursor-pointer";
+const glassInput  = "w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-purple-500/50 outline-none transition-all shadow-sm dark:shadow-none";
 
 const CATEGORY_COLORS = {
   Technical: '#22d3ee',
@@ -41,11 +42,11 @@ const AdminSkillsPage = () => {
 
   const [skillForm, setSkillForm] = useState({ name: '', category: '', description: '' });
   const [assignForm, setAssignForm] = useState({ 
-    employeeId: initialEmpId, 
-    skillId: '', 
     proficiencyLevel: 3, 
     yearsOfExperience: 0 
   });
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   const showSuccess = (msg) => { setSuccessMsg(msg); setTimeout(() => setSuccessMsg(''), 3000); };
 
@@ -137,7 +138,7 @@ const AdminSkillsPage = () => {
         {sectionTabs.map(({ id, label, Icon }) => (
           <button key={id} onClick={() => setActiveSection(id)}
             className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-              activeSection === id ? 'bg-white text-black shadow-lg shadow-white/10' : 'bg-white/5 border border-white/5 text-slate-400 hover:bg-white/10'
+              activeSection === id ? 'bg-slate-900 dark:bg-white text-white dark:text-black shadow-lg dark:shadow-white/10' : 'bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10'
             }`}>
             <Icon className="w-3.5 h-3.5" />{label}
           </button>
@@ -151,11 +152,11 @@ const AdminSkillsPage = () => {
             <BorderGlow borderRadius={28}>
               <div className="p-6">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                    <BookOpen className="w-4 h-4 text-cyan-400" />
+                  <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                    <BookOpen className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">Skill Library</h3>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Skill Library</h3>
                     <p className="text-[10px] text-slate-500">{skills.length} skills in the master library</p>
                   </div>
                 </div>
@@ -177,22 +178,26 @@ const AdminSkillsPage = () => {
                       return (
                         <motion.div key={skill._id}
                           initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.04 }}
-                          className="group p-5 rounded-2xl bg-white/4 border border-white/5 hover:border-white/10 hover:bg-white/[0.07] transition-all">
+                          className={`group p-5 rounded-2xl border transition-all shadow-sm dark:shadow-none ${
+                            isLight 
+                              ? 'bg-slate-50 border-slate-100 hover:border-slate-200 hover:bg-slate-100'
+                              : 'bg-white/4 border-white/5 hover:border-white/10 hover:bg-white/[0.07]'
+                          }`}>
                           <div className="flex items-start justify-between mb-3">
                             <div className="p-2 rounded-lg" style={{ background: `${catColor}15`, border: `1px solid ${catColor}25` }}>
                               <Zap className="w-3.5 h-3.5" style={{ color: catColor }} />
                             </div>
-                            <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${skill.isActive ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 'text-slate-500 bg-white/5 border-white/5'}`}>
+                            <span className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full border ${skill.isActive ? 'text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/20' : 'text-slate-500 bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5'}`}>
                               {skill.isActive ? 'Active' : 'Inactive'}
                             </span>
                           </div>
-                          <h4 className="text-sm font-bold text-white mb-1 group-hover:text-cyan-300 transition-colors">{skill.name}</h4>
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-white mb-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors uppercase tracking-tight">{skill.name}</h4>
                           <div className="flex items-center gap-1.5">
                             <div className="w-2 h-2 rounded-full" style={{ background: catColor }} />
-                            <span className="text-[10px] text-slate-500 font-medium">{skill.category}</span>
+                            <span className="text-[10px] text-slate-500 font-black uppercase tracking-wider">{skill.category}</span>
                           </div>
                           {skill.description && (
-                            <p className="text-[11px] text-slate-600 mt-2 leading-relaxed line-clamp-2">{skill.description}</p>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-600 mt-2 leading-relaxed line-clamp-2 font-medium">{skill.description}</p>
                           )}
                         </motion.div>
                       );
@@ -210,11 +215,11 @@ const AdminSkillsPage = () => {
             <BorderGlow borderRadius={28}>
               <div className="p-8">
                 <div className="flex items-center gap-3 mb-8">
-                  <div className="p-2.5 rounded-xl bg-violet-500/10 border border-violet-500/20">
-                    <Plus className="w-5 h-5 text-violet-400" />
+                  <div className="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                    <Plus className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">Create New Skill</h3>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Create New Skill</h3>
                     <p className="text-[10px] text-slate-500 mt-0.5">Add a skill to the master library</p>
                   </div>
                 </div>
@@ -259,10 +264,10 @@ const AdminSkillsPage = () => {
               <div className="p-8">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                    <Award className="w-5 h-5 text-amber-400" />
+                    <Award className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-white">Assign Skill to Employee</h3>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Assign Skill to Employee</h3>
                     <p className="text-[10px] text-slate-500 mt-0.5">Endorse a skill on an employee's profile</p>
                   </div>
                 </div>
@@ -293,9 +298,9 @@ const AdminSkillsPage = () => {
                       <div className="flex items-center gap-3">
                         <input type="range" min={1} max={5} value={assignForm.proficiencyLevel}
                           onChange={e => setAssignForm(p => ({ ...p, proficiencyLevel: Number(e.target.value) }))}
-                          className="flex-1 accent-violet-500 h-2 rounded-full" />
-                        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black border"
-                          style={{ background: `${PROFICIENCY_COLORS[assignForm.proficiencyLevel]}20`, color: PROFICIENCY_COLORS[assignForm.proficiencyLevel], borderColor: `${PROFICIENCY_COLORS[assignForm.proficiencyLevel]}40` }}>
+                          className="flex-1 accent-purple-600 h-2 rounded-full cursor-pointer" />
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black border shadow-sm"
+                          style={{ background: `${PROFICIENCY_COLORS[assignForm.proficiencyLevel]}15`, color: PROFICIENCY_COLORS[assignForm.proficiencyLevel], borderColor: `${PROFICIENCY_COLORS[assignForm.proficiencyLevel]}30` }}>
                           {assignForm.proficiencyLevel}
                         </div>
                       </div>
@@ -323,9 +328,9 @@ const AdminSkillsPage = () => {
               <BorderGlow borderRadius={24}>
                 <div className="p-6">
                   <div className="flex items-center gap-3 mb-5">
-                    <Layers className="w-4 h-4 text-slate-400" />
-                    <h3 className="text-sm font-bold text-white">Current Skills</h3>
-                    <span className="ml-auto text-[10px] font-bold text-slate-600">{assignments.length} endorsed</span>
+                    <Layers className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">Current Skills</h3>
+                    <span className="ml-auto text-[10px] font-bold text-slate-500 dark:text-slate-600 uppercase tracking-widest">{assignments.length} endorsed</span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {assignments.map((a, idx) => {
@@ -334,16 +339,20 @@ const AdminSkillsPage = () => {
                       return (
                         <motion.div key={a._id}
                           initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }}
-                          className="p-4 rounded-xl bg-white/4 border border-white/5">
+                          className={`p-4 rounded-xl border shadow-sm dark:shadow-none ${
+                            isLight
+                              ? 'bg-slate-50 border-slate-100'
+                              : 'bg-white/4 border-white/5'
+                          }`}>
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-bold text-white">{a.skillId?.name || '—'}</span>
-                            <span className="text-[10px] font-bold" style={{ color: pctColor }}>{PROFICIENCY_LABELS[lvl]}</span>
+                            <span className="text-xs font-bold text-slate-900 dark:text-white">{a.skillId?.name || '—'}</span>
+                            <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: pctColor }}>{PROFICIENCY_LABELS[lvl]}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <div className="flex-1 h-1.5 rounded-full bg-white/5">
+                            <div className="flex-1 h-1.5 rounded-full bg-slate-200 dark:bg-white/5 overflow-hidden">
                               <div className="h-full rounded-full transition-all" style={{ width: `${(lvl / 5) * 100}%`, background: pctColor }} />
                             </div>
-                            <span className="text-[10px] text-slate-500">{a.yearsOfExperience}yr</span>
+                            <span className="text-[10px] text-slate-500 font-bold">{a.yearsOfExperience}yr</span>
                           </div>
                         </motion.div>
                       );

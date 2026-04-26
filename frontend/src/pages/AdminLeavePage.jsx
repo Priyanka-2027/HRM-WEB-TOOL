@@ -5,6 +5,7 @@ import PageHeader from '../components/layout/PageHeader';
 import BorderGlow from '../components/ui/BorderGlow';
 import GlassSelect from '../components/ui/GlassSelect';
 import { leaveService } from '../api/leaveService';
+import { useTheme } from '../contexts/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, CheckCircle, XCircle, CalendarDays, AlertCircle, Filter, ChevronRight } from 'lucide-react';
 
@@ -40,6 +41,8 @@ const AdminLeavePage = () => {
   const [actionLoadingId, setActionLoadingId] = useState('');
   const [statusFilter, setStatusFilter] = useState(searchParams.get('status') || 'pending');
   const [employeeFilter, setEmployeeFilter] = useState(searchParams.get('employeeId') || '');
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   const fetchLeaves = async () => {
     try {
@@ -124,7 +127,7 @@ const AdminLeavePage = () => {
                     <card.icon className="w-4 h-4" style={{ color: card.color }} />
                   </div>
                 </div>
-                <p className="text-4xl font-black text-white">{card.value}</p>
+                <p className="text-4xl font-black text-slate-900 dark:text-white tabular-nums">{card.value}</p>
               </div>
             </BorderGlow>
           </motion.div>
@@ -139,9 +142,9 @@ const AdminLeavePage = () => {
           placeholder="All Status"
         />
         {employeeFilter && (
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400">
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400">
             <div className="flex items-center gap-3">
-              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              <div className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
               <span className="text-xs font-bold uppercase tracking-widest">Filtering by Employee</span>
             </div>
             <button onClick={() => setEmployeeFilter('')} className="px-3 py-1.5 rounded-lg bg-black/20 hover:bg-black/40 text-[10px] font-black tracking-tight transition-all">CLEAR FILTER</button>
@@ -154,7 +157,7 @@ const AdminLeavePage = () => {
         <div className="p-6">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <div className="w-8 h-8 border-2 border-white/20 border-t-cyan-400 rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-white/20 border-t-purple-400 rounded-full animate-spin" />
               <p className="text-slate-500 text-sm">Loading leave requests...</p>
             </div>
           ) : leaves.length === 0 ? (
@@ -182,7 +185,11 @@ const AdminLeavePage = () => {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ delay: idx * 0.04 }}
-                      className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-white/4 border border-white/5 hover:border-white/10 hover:bg-white/[0.06] transition-all"
+                      className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl border transition-all shadow-sm dark:shadow-none ${
+                        isLight 
+                          ? 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50' 
+                          : 'bg-white/4 border-white/5 hover:border-white/10 hover:bg-white/[0.06]'
+                      }`}
                     >
                       {/* Left: Employee details */}
                       <div className="flex items-center gap-4 min-w-0">
@@ -190,7 +197,7 @@ const AdminLeavePage = () => {
                           <span className={`text-xs font-black ${cfg.text}`}>{empName[0] || '?'}</span>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-bold text-white truncate">{empName}</p>
+                          <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{empName}</p>
                           <p className="text-[11px] text-slate-500 mt-0.5 uppercase tracking-widest capitalize">{leave.leaveType} leave</p>
                         </div>
                       </div>

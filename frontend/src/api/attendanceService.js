@@ -54,4 +54,10 @@ export const attendanceService = {
     });
     return response.data;
   },
+
+  // Get team attendance for manager
+  getTeamAttendance: async (params = {}) => {
+    const response = await axios.get(`${API_URL}/team`, { params });
+    return response.data;
+  },
 };

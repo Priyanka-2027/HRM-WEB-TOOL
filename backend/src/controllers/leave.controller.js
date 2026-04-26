@@ -181,3 +181,34 @@ export const deleteLeave = async (req, res, next) => {
     next(error);
   }
 };
+
+// Get team leaves
+export const getTeamLeaves = async (req, res, next) => {
+  try {
+    const { status, leaveType } = req.query;
+
+    const manager = await Employee.findOne({ userId: req.user.id });
+    if (!manager) {
+      return sendError(res, 404, 'Manager employee record not found');
+    }
+
+    const teamMembers = await Employee.find({ reportingTo: manager._id }).select('_id');
+    const teamIds = teamMembers.map(emp => emp._id);
+
+    const filter = { employeeId: { $in: teamIds } };
+    if (status) filter.status = status;
+    if (leaveType) filter.leaveType = leaveType;
+
+    const leaves = await Leave.find(filter)
+      .populate('userId', 'firstName lastName email')
+      .populate('employeeId', 'designation department')
+      .sort({ createdAt: -1 });
+
+    return sendResponse(res, 200, {
+      success: true,
+      data: leaves,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

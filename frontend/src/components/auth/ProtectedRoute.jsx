@@ -21,7 +21,9 @@ export const ProtectedRoute = ({ children, requiredRole = null }) => {
   }
 
   if (requiredRole && user?.role !== requiredRole) {
-    return <Navigate to={user?.role === 'admin' ? '/admin/dashboard' : '/employee/dashboard'} replace />;
+    if (user?.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
+    if (user?.role === 'manager') return <Navigate to="/manager/dashboard" replace />;
+    return <Navigate to="/employee/dashboard" replace />;
   }
 
   return children;
@@ -42,7 +44,9 @@ export const PublicRoute = ({ children }) => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to={user?.role === 'admin' ? '/admin/dashboard' : '/employee/dashboard'} replace />;
+    if (user?.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
+    if (user?.role === 'manager') return <Navigate to="/manager/dashboard" replace />;
+    return <Navigate to="/employee/dashboard" replace />;
   }
 
   return children;

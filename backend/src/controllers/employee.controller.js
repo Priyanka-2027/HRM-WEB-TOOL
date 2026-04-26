@@ -238,3 +238,25 @@ export const getEmployeeStats = async (req, res, next) => {
     next(error);
   }
 };
+
+// Get manager's team
+export const getMyTeam = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const manager = await Employee.findOne({ userId });
+    if (!manager) {
+      return sendError(res, 404, 'Manager employee record not found');
+    }
+
+    const team = await Employee.find({ reportingTo: manager._id })
+      .populate('userId', 'email firstName lastName')
+      .populate('reportingTo', 'email designation');
+
+    return sendResponse(res, 200, {
+      success: true,
+      data: team,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

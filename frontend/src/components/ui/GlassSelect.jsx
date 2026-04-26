@@ -52,9 +52,9 @@ const GlassSelect = ({
           className={`
             w-full flex items-center justify-between
             px-4 py-3 rounded-xl text-sm text-left
-            bg-white/5 border transition-all
-            ${open ? 'border-cyan-500/50 bg-white/[0.07]' : error ? 'border-red-500/50' : 'border-white/8'}
-            ${!selected ? 'text-slate-600' : 'text-white'}
+            bg-slate-50 dark:bg-white/5 border transition-all shadow-sm dark:shadow-none
+            ${open ? 'border-purple-500/40 bg-white dark:bg-white/[0.07]' : error ? 'border-red-500/50' : 'border-slate-200 dark:border-white/8'}
+            ${!selected ? 'text-slate-400 dark:text-slate-600' : 'text-slate-900 dark:text-white font-medium'}
             focus:outline-none
           `}
         >
@@ -72,7 +72,7 @@ const GlassSelect = ({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -6, scale: 0.98 }}
               transition={{ duration: 0.15 }}
-              className="absolute z-50 top-full mt-2 w-full rounded-xl border border-white/10 bg-[#0d1020]/95 backdrop-blur-3xl shadow-2xl shadow-black/60 overflow-hidden py-1"
+              className="absolute z-50 top-full mt-2 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white/98 dark:bg-[#050507]/98 backdrop-blur-3xl shadow-2xl shadow-slate-200/50 dark:shadow-black/80 overflow-hidden py-1"
             >
               {options.map(opt => {
                 const isSelected = String(opt.value) === String(value);
@@ -84,13 +84,13 @@ const GlassSelect = ({
                     className={`
                       w-full flex items-center justify-between px-4 py-2.5 text-sm text-left transition-all
                       ${isSelected
-                        ? 'bg-cyan-500/10 text-cyan-300'
-                        : 'text-slate-300 hover:bg-white/[0.07] hover:text-white'
+                        ? 'bg-purple-600/10 dark:bg-purple-500/10 text-purple-700 dark:text-purple-300 font-bold'
+                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.07] hover:text-slate-900 dark:hover:text-white'
                       }
                     `}
                   >
                     <span>{opt.label}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5 text-cyan-400 shrink-0" />}
+                    {isSelected && <Check className="w-3.5 h-3.5 text-purple-400 shrink-0" />}
                   </button>
                 );
               })}
