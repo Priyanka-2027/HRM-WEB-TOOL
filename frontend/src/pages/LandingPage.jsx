@@ -173,13 +173,9 @@ const LandingPage = () => {
         <footer className="py-12 px-4 border-t border-slate-200 dark:border-white/5 bg-slate-50/50 dark:bg-black/20 backdrop-blur-md">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex items-center gap-4">
+              <img src="/hironix.png" alt="Hironix" className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(124,58,237,0.2)] dark:invert" />
               <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">HIRONIX</span>
               <span className="text-[10px] text-slate-400 dark:text-slate-600 font-bold uppercase tracking-widest pt-1">© 2026 NEXUS SYSTEMS</span>
-            </div>
-            <div className="flex gap-8 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-              <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">Privacy</a>
-              <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">Terms</a>
-              <a href="#" className="hover:text-slate-900 dark:hover:text-white transition-colors">Contact</a>
             </div>
           </div>
         </footer>
