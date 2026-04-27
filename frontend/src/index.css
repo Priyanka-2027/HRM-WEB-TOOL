@@ -4,7 +4,7 @@
 
 :root {
   color-scheme: dark;
-  --bg-base: #050507;
+  --bg-base: #000000;
   --bg-surface: rgba(18, 18, 24, 0.94);
   --bg-elevated: rgba(24, 24, 32, 0.98);
   --bg-overlay: rgba(36, 36, 48, 0.92);

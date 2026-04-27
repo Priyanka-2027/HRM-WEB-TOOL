@@ -39,8 +39,8 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const glassSelect = "w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-white focus:border-purple-500/40 outline-none transition-all appearance-none cursor-pointer";
-const glassInput  = "w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-white placeholder:text-slate-600 focus:border-purple-500/40 outline-none transition-all";
+const glassSelect = "w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-purple-500/40 outline-none transition-all appearance-none cursor-pointer";
+const glassInput  = "w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-600 focus:border-purple-500/40 outline-none transition-all";
 
 const AdminAttendancePage = () => {
   const [searchParams] = useSearchParams();

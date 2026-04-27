@@ -62,7 +62,7 @@ export const createEmployee = async (req, res, next) => {
 // Get all employees
 export const getAllEmployees = async (req, res, next) => {
   try {
-    const { search, department, status, page = 1, limit = 10 } = req.query;
+    const { search, department, status, reportingTo, unassigned, page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
 
     // Build filter
@@ -75,6 +75,8 @@ export const getAllEmployees = async (req, res, next) => {
     }
     if (department) filter.department = department;
     if (status) filter.status = status;
+    if (reportingTo) filter.reportingTo = reportingTo;
+    if (unassigned === 'true') filter.reportingTo = null;
 
     const employees = await Employee.find(filter)
       .populate('userId', 'email firstName lastName')

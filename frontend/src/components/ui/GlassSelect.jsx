@@ -23,6 +23,7 @@ const GlassSelect = ({
   error = '',
   required = false,
   className = '',
+  dropdownPosition = 'bottom',
 }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -68,11 +69,11 @@ const GlassSelect = ({
         <AnimatePresence>
           {open && (
             <motion.div
-              initial={{ opacity: 0, y: -6, scale: 0.98 }}
+              initial={{ opacity: 0, y: dropdownPosition === 'top' ? 6 : -6, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -6, scale: 0.98 }}
+              exit={{ opacity: 0, y: dropdownPosition === 'top' ? 6 : -6, scale: 0.98 }}
               transition={{ duration: 0.15 }}
-              className="absolute z-50 top-full mt-2 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white/98 dark:bg-[#050507]/98 backdrop-blur-3xl shadow-2xl shadow-slate-200/50 dark:shadow-black/80 overflow-hidden py-1"
+              className={`absolute z-50 w-full rounded-xl border border-slate-200 dark:border-white/10 bg-white/98 dark:bg-[#050507]/98 backdrop-blur-3xl shadow-2xl shadow-slate-200/50 dark:shadow-black/80 overflow-hidden py-1 max-h-60 overflow-y-auto ${dropdownPosition === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'}`}
             >
               {options.map(opt => {
                 const isSelected = String(opt.value) === String(value);

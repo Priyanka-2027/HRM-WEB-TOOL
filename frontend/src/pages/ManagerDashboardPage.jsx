@@ -6,11 +6,12 @@ import { employeeService } from '../api/employeeService';
 import { taskService } from '../api/taskService';
 import { attendanceService } from '../api/attendanceService';
 import { useTheme } from '../contexts/ThemeContext';
-import { Users, Clock, AlertCircle, CheckCircle, ListTodo } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Users, Clock, AlertCircle, CheckCircle, ListTodo, Eye, X, Mail, Phone, Briefcase } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ManagerDashboardPage = () => {
   const [team, setTeam] = useState([]);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [attendance, setAttendance] = useState([]);
   const [error, setError] = useState('');
@@ -115,6 +116,19 @@ const ManagerDashboardPage = () => {
                       <p className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">{emp.userId?.firstName} {emp.userId?.lastName}</p>
                       <p className="text-[10px] text-slate-500">{emp.designation}</p>
                     </div>
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={() => setSelectedEmployee(emp)} 
+                        className={`p-1.5 w-7 h-7 rounded-lg border transition-colors flex items-center justify-center ${
+                          isLight 
+                            ? 'bg-slate-50 border-slate-200 text-slate-400 hover:text-emerald-500 hover:bg-emerald-50 hover:border-emerald-200' 
+                            : 'bg-white/5 border-white/10 text-slate-400 hover:text-emerald-400 hover:bg-emerald-400/10 hover:border-emerald-400/30'
+                        }`}
+                        title="View Details"
+                      >
+                        <Eye className="w-3.5 h-3.5 shrink-0" />
+                      </button>
+                    </div>
                   </motion.div>
                 ))}
               </div>
@@ -163,6 +177,77 @@ const ManagerDashboardPage = () => {
           </div>
         </BorderGlow>
       </div>
+
+      <AnimatePresence>
+        {selectedEmployee && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setSelectedEmployee(null)}
+              className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }} 
+              animate={{ opacity: 1, scale: 1, y: 0 }} 
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className={`relative z-10 w-full max-w-md rounded-3xl border shadow-2xl p-6 ${isLight ? 'bg-white border-slate-200' : 'bg-[#0f111a] border-white/10'}`}
+            >
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Employee Details</h3>
+                <button onClick={() => setSelectedEmployee(null)} className="p-2 -mr-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400/20 to-cyan-400/20 border border-emerald-400/30 flex items-center justify-center text-emerald-500 text-xl font-black shrink-0">
+                  {((selectedEmployee.userId?.firstName?.[0]) || (selectedEmployee.email?.[0]) || '?').toUpperCase()}
+                </div>
+                <div>
+                  <h4 className="text-base font-black text-slate-900 dark:text-white leading-tight mb-1">{selectedEmployee.userId?.firstName} {selectedEmployee.userId?.lastName}</h4>
+                  <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] uppercase tracking-widest font-bold ${
+                    selectedEmployee.status === 'active' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-slate-500'
+                  }`}>
+                    {selectedEmployee.status}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400">
+                    <Briefcase className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Role</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedEmployee.designation} <span className="text-slate-400 mx-1">·</span> {selectedEmployee.department}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400">
+                    <Mail className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Email</p>
+                    <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedEmployee.email}</p>
+                  </div>
+                </div>
+                {selectedEmployee.phoneNumber && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-400">
+                      <Phone className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Phone</p>
+                      <p className="text-sm font-medium text-slate-900 dark:text-white">{selectedEmployee.phoneNumber}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
     </AppShell>
   );

@@ -32,10 +32,15 @@ const GlassTooltip = ({ active, payload, label }) => {
   );
 };
 
-// Custom filled radar dot
+// Custom filled radar dot with glow
 const CustomRadarDot = (props) => {
   const { cx, cy } = props;
-  return <circle cx={cx} cy={cy} r={4} fill="#a855f7" stroke="rgba(168,85,247,0.3)" strokeWidth={4} />;
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={8} fill="rgba(168,85,247,0.3)" className="animate-pulse" />
+      <circle cx={cx} cy={cy} r={3} fill="#a855f7" stroke="#ffffff" strokeWidth={1.5} />
+    </g>
+  );
 };
 
 const EmployeeDashboardPage = () => {
@@ -209,16 +214,22 @@ const EmployeeDashboardPage = () => {
                   <div className="h-full flex items-center justify-center text-slate-600 italic text-sm">No skills endorsed yet</div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart cx="50%" cy="50%" outerRadius="70%" data={skillData}>
-                      <PolarGrid stroke={theme === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'} />
-                      <PolarAngleAxis dataKey="subject" tick={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.5)' : 'rgba(15,23,42,0.6)', fontSize: 11 }} />
-                      <PolarRadiusAxis angle={30} domain={[0, 5]} tick={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.35)', fontSize: 9 }} />
+                    <RadarChart cx="50%" cy="50%" outerRadius="65%" data={skillData}>
+                      <defs>
+                        <radialGradient id="radarFill" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+                          <stop offset="0%" stopColor="#c084fc" stopOpacity={0.6} />
+                          <stop offset="100%" stopColor="#7c3aed" stopOpacity={0.1} />
+                        </radialGradient>
+                      </defs>
+                      <PolarGrid gridType="polygon" stroke={theme === 'dark' ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'} />
+                      <PolarAngleAxis dataKey="subject" tick={{ fill: theme === 'dark' ? 'rgba(255,255,255,0.8)' : 'rgba(15,23,42,0.9)', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }} />
+                      <PolarRadiusAxis angle={90} domain={[0, 5]} axisLine={false} tick={false} />
                       <Radar name="Skill Level" dataKey="A"
-                        stroke="#a855f7" strokeWidth={2}
-                        fill="#a855f7" fillOpacity={0.25}
+                        stroke="#a855f7" strokeWidth={3}
+                        fill="url(#radarFill)" fillOpacity={1}
                         dot={<CustomRadarDot />}
                       />
-                      <Tooltip content={<GlassTooltip />} />
+                      <Tooltip content={<GlassTooltip />} cursor={{ fill: 'rgba(255,255,255,0.05)' }} />
                     </RadarChart>
                   </ResponsiveContainer>
                 )}

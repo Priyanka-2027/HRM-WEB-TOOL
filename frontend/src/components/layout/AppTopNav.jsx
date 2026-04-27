@@ -110,12 +110,8 @@ const AppTopNav = ({ userRole = 'employee' }) => {
   const markRead = (id) => setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
 
   return (
-    <nav className="sticky top-6 z-50 mx-4 md:mx-auto max-w-7xl">
-      <div className={`rounded-3xl border transition-all duration-300 ${
-        location.pathname !== '/' // If you want scroll state you can pass a `scrolled` prop, for now simple default
-          ? 'bg-white/90 dark:bg-[#050507]/90 backdrop-blur-2xl border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-black/80'
-          : 'bg-white/80 dark:bg-[#050507]/80 backdrop-blur-2xl border-slate-200 dark:border-white/10 shadow-2xl shadow-slate-200/50 dark:shadow-black/80'
-      } px-4 sm:px-6`}>
+    <nav className="fixed top-6 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-[calc(100%-2rem)] max-w-7xl z-50 transition-all duration-300">
+      <div className="rounded-3xl transition-all duration-300 bg-white/70 dark:bg-[#050507]/60 backdrop-blur-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-black/80 px-4 sm:px-6">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center gap-12">

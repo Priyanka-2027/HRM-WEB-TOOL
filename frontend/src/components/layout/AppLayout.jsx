@@ -2,7 +2,7 @@ import Prism from '../background/Prism';
 
 const AppLayout = ({ children, showPrism = false }) => {
   return (
-    <div className="w-full min-h-screen relative overflow-hidden bg-slate-50 dark:bg-[#050507] transition-colors duration-500">
+    <div className="w-full min-h-screen relative overflow-hidden bg-slate-50 dark:bg-black transition-colors duration-500">
       {/* Dynamic Background Layer */}
       {showPrism && (
         <div className="fixed inset-0 z-0 pointer-events-none transition-opacity duration-700 dark:opacity-20 opacity-10">
@@ -23,7 +23,7 @@ const AppLayout = ({ children, showPrism = false }) => {
 
 
       {/* Deep Silk Overlay - Adapted for theme */}
-      <div className="fixed inset-0 z-1 pointer-events-none bg-[radial-gradient(circle_at_50%_-20%,rgba(124,58,237,0.05)_0%,rgba(248,250,252,0)_80%)] dark:bg-[radial-gradient(circle_at_50%_-20%,rgba(124,58,237,0.1)_0%,#050507_80%)]" />
+      <div className="fixed inset-0 z-1 pointer-events-none bg-[radial-gradient(circle_at_50%_-20%,rgba(124,58,237,0.05)_0%,rgba(248,250,252,0)_80%)] dark:hidden" />
 
       {/* Noise Texture for Premium Feel */}
       <div className="noise-overlay" style={{

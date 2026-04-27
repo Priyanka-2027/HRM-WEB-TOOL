@@ -172,8 +172,8 @@ const EmployeeLeavePage = () => {
         <BorderGlow borderRadius={28}>
           <div className="p-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 rounded-lg bg-cyan-500/10 border border-cyan-500/20">
-                <CalendarOff className="w-4 h-4 text-cyan-400" />
+              <div className="p-2 rounded-lg bg-purple-500/10 border border-purple-500/20">
+                <CalendarOff className="w-4 h-4 text-purple-400" />
               </div>
               <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Request Leave</h3>
             </div>
@@ -189,13 +189,13 @@ const EmployeeLeavePage = () => {
                 <textarea value={form.reason}
                   onChange={e => setForm(p => ({ ...p, reason: e.target.value }))}
                   rows={3} required placeholder="Brief reason for leave…"
-                  className="w-full px-4 py-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-cyan-500/50 resize-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/8 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:outline-none focus:border-purple-500/50 resize-none transition-all"
                 />
               </div>
               <div className="md:col-span-2">
                 <motion.button type="submit" disabled={submitting}
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black text-xs font-black uppercase tracking-widest shadow-lg shadow-cyan-500/20 transition-all disabled:opacity-50">
+                  className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white text-xs font-black uppercase tracking-widest shadow-lg shadow-purple-500/20 transition-all disabled:opacity-50">
                   <Send className="w-4 h-4" />{submitting ? 'Submitting…' : 'Submit Request'}
                 </motion.button>
               </div>
@@ -212,7 +212,7 @@ const EmployeeLeavePage = () => {
             </div>
             {loading ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <div className="w-6 h-6 border-2 border-white/20 border-t-cyan-400 rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-white/20 border-t-purple-400 rounded-full animate-spin" />
                 <p className="text-slate-500 text-sm">Loading history…</p>
               </div>
             ) : leaves.length === 0 ? (
